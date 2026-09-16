@@ -2591,6 +2591,11 @@ textarea:hover:not(:disabled) {
   .energy-breakdown b {
     font-size: 20px;
   }
+  .energy-breakdown small {
+    display: block;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
   .energy-breakdown > div + div {
     padding-left: 12px;
   }
