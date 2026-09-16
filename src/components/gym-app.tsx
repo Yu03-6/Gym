@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import {
   Activity,
+  ChevronDown,
+  Scale,
   ArrowUpRight,
   ChevronLeft,
   ChevronRight,
@@ -15,16 +17,16 @@ import {
   TrendingUp,
   WifiOff,
 } from "lucide-react";
+import { goTo, useRoute } from "@/lib/navigation";
 import { StoreProvider, useStore } from "@/lib/store";
 import {
   completedSets,
-  phaseAt,
   resolveTarget,
   shiftDate,
   today,
   totals,
 } from "@/lib/model";
-import { Button, Empty, round, SectionHead } from "./ui";
+import { Button, round } from "./ui";
 import { MacroBars } from "./macro-bars";
 import { ProfileForm } from "./profile-form";
 import { Nutrition } from "./nutrition";
@@ -53,26 +55,33 @@ export function GymApp() {
 }
 function App() {
   const { state, ready, error, saving, message } = useStore();
-  const [tab, setTab] = useState<Tab>("today");
+  const route = useRoute();
+  const root = route.split("/")[0];
+  const tab: Tab = tabs.some((t) => t.id === root) ? (root as Tab) : "today";
+  const subpage = route.split("/")[1] || "";
+  const [calendar, setCalendar] = useState(false);
+  const management =
+    (tab === "nutrition" && ["foods", "phases"].includes(subpage)) ||
+    (tab === "training" &&
+      ["templates", "history", "session"].includes(subpage));
+  const pageNames: Record<string, string> = {
+    foods: "我的食物",
+    phases: "阶段计划",
+    templates: "训练模板",
+    history: "训练历史",
+    session: "训练中",
+  };
   const [date, setDate] = useState(today);
   const [profile, setProfile] = useState(false);
   const [settings, setSettings] = useState(false);
   const [offline, setOffline] = useState(false);
   const [updateWorker, setUpdateWorker] = useState<ServiceWorker | null>(null);
   useEffect(() => {
-    function sync() {
-      const t = location.hash.slice(1);
-      if (tabs.some((x) => x.id === t)) setTab(t as Tab);
-      else if (!t) setTab("today");
-    }
-    sync();
-    window.addEventListener("hashchange", sync);
     const net = () => setOffline(!navigator.onLine);
     net();
     window.addEventListener("online", net);
     window.addEventListener("offline", net);
     return () => {
-      window.removeEventListener("hashchange", sync);
       window.removeEventListener("online", net);
       window.removeEventListener("offline", net);
     };
@@ -97,10 +106,19 @@ function App() {
         .catch(() => {});
     }
   }, []);
-  function navigate(next: Tab) {
-    location.hash = next;
-    setTab(next);
+  useEffect(() => {
+    setCalendar(false);
     window.scrollTo({ top: 0, behavior: "instant" });
+    const frame = requestAnimationFrame(() => {
+      if (!document.querySelector('[role="dialog"]'))
+        document
+          .querySelector<HTMLElement>("h1")
+          ?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [route]);
+  function navigate(next: string) {
+    goTo(next);
   }
   const d = new Date(`${date}T12:00:00`);
   const monday = shiftDate(date, -((d.getDay() + 6) % 7));
@@ -189,74 +207,88 @@ function App() {
             当前离线，记录继续保存在本机。
           </div>
         )}
-        <div className="page-heading">
+        <div className={`page-heading ${management ? "detail-heading" : ""}`}>
           <div>
-            <p className="eyebrow">
-              {d.toLocaleDateString("zh-CN", {
-                month: "long",
-                year: "numeric",
-              })}
-            </p>
-            <h1>
-              {tabs.find((t) => t.id === tab)?.name}
-              <span>
-                {tab === "today"
-                  ? "一步一步来。"
-                  : tab === "nutrition"
-                    ? "吃得有数。"
-                    : tab === "training"
-                      ? "每组都算数。"
-                      : "看见变化。"}
-              </span>
+            {management ? (
+              <a className="back-link" href={`#${tab}`}>
+                <ChevronLeft size={18} />
+                返回{tab === "training" ? "训练" : "饮食"}
+              </a>
+            ) : (
+              <p className="eyebrow">
+                {d.toLocaleDateString("zh-CN", {
+                  month: "long",
+                  day: "numeric",
+                  weekday: "long",
+                })}
+              </p>
+            )}
+            <h1 tabIndex={-1}>
+              {management
+                ? pageNames[subpage]
+                : tabs.find((t) => t.id === tab)?.name}
             </h1>
           </div>
-          <label className="date-picker">
-            <input
-              type="date"
-              value={date}
-              max={shiftDate(today(), 365)}
-              aria-label="查看日期"
-              onChange={(e) => {
-                if (e.target.value) setDate(e.target.value);
-              }}
-            />
-          </label>
-        </div>
-        <div className="week-strip">
-          <button
-            className="week-arrow"
-            aria-label="上一周"
-            onClick={() => setDate(shiftDate(date, -7))}
-          >
-            <ChevronLeft size={19} />
-          </button>
-          {Array.from({ length: 7 }, (_, i) => {
-            const day = shiftDate(monday, i);
-            const has =
-              state.logs.some((l) => l.date === day) ||
-              state.sessions.some((s) => s.date === day);
-            return (
+          {!management && (
+            <div className="date-tools">
+              <input
+                type="date"
+                value={date}
+                max={shiftDate(today(), 365)}
+                aria-label="查看日期"
+                onChange={(e) => {
+                  if (e.target.value) setDate(e.target.value);
+                }}
+              />
               <button
-                key={day}
-                aria-label={`${day}${day === today() ? " 今天" : ""}`}
-                aria-pressed={date === day}
-                className={`week-day ${date === day ? "selected" : ""} ${day === today() ? "is-today" : ""}`}
-                onClick={() => setDate(day)}
+                className="calendar-toggle"
+                aria-label="展开周历"
+                aria-expanded={calendar}
+                onClick={() => setCalendar(!calendar)}
               >
-                <span>{["一", "二", "三", "四", "五", "六", "日"][i]}</span>
-                <b>{Number(day.slice(-2))}</b>
-                <i className={has ? "has-data" : ""} />
+                周历
+                <ChevronDown size={14} />
               </button>
-            );
-          })}
-          <button
-            className="week-arrow"
-            aria-label="下一周"
-            onClick={() => setDate(shiftDate(date, 7))}
-          >
-            <ChevronRight size={19} />
-          </button>
+            </div>
+          )}
         </div>
+        {calendar && !management && (
+          <div className="week-strip">
+            <button
+              className="week-arrow"
+              aria-label="上一周"
+              onClick={() => setDate(shiftDate(date, -7))}
+            >
+              <ChevronLeft size={19} />
+            </button>
+            {Array.from({ length: 7 }, (_, i) => {
+              const day = shiftDate(monday, i);
+              const has =
+                state.logs.some((l) => l.date === day) ||
+                state.sessions.some((s) => s.date === day);
+              return (
+                <button
+                  key={day}
+                  aria-label={`${day}${day === today() ? " 今天" : ""}`}
+                  aria-pressed={date === day}
+                  className={`week-day ${date === day ? "selected" : ""} ${day === today() ? "is-today" : ""}`}
+                  onClick={() => setDate(day)}
+                >
+                  <span>{["一", "二", "三", "四", "五", "六", "日"][i]}</span>
+                  <b>{Number(day.slice(-2))}</b>
+                  <i className={has ? "has-data" : ""} />
+                </button>
+              );
+            })}
+            <button
+              className="week-arrow"
+              aria-label="下一周"
+              onClick={() => setDate(shiftDate(date, 7))}
+            >
+              <ChevronRight size={19} />
+            </button>
+          </div>
+        )}
         {!ready ? (
           <div className="loading" role="status">
             {error ? "记录暂时无法打开" : "正在打开你的记录…"}
@@ -277,9 +309,6 @@ function App() {
             {tab === "trends" && <Trends date={date} />}
           </>
         )}
-        <footer className="page-footer">
-          FitGo<span>不赶进度，保持记录。</span>
-        </footer>
       </main>
       <nav className="bottom-nav" aria-label="手机主导航">
         {tabs.map((t) => (
@@ -320,13 +349,12 @@ function Today({
 }: {
   date: string;
   onSetup: () => void;
-  navigate: (tab: Tab) => void;
+  navigate: (tab: string) => void;
 }) {
   const { state } = useStore();
   const target = resolveTarget(state, date);
   const total = totals(state, date);
   const active = state.sessions.find((s) => s.status === "active");
-  const phase = phaseAt(state, date);
   const scheduled = state.schedule.filter((s) => s.date === date);
   const sessions = state.sessions.filter(
     (s) => s.date === date && s.status === "completed",
@@ -336,7 +364,7 @@ function Today({
     .reduce((s, a) => s + a.calories, 0);
   const remaining = target ? target.macros.calories - total.calories : 0;
   return (
-    <div className="view-enter">
+    <div className="view-enter today-view">
       {!target && (
         <section className="setup-callout">
           <div className="setup-art">
@@ -353,7 +381,7 @@ function Today({
           </Button>
         </section>
       )}
-      <div className="dashboard-grid">
+      <div className="daily-overview">
         <section className="card energy-card">
           <div className="card-label">
             <span>
@@ -423,129 +451,78 @@ function Today({
               </b>
             </div>
           </div>
-          <button className="card-link" onClick={() => navigate("nutrition")}>
-            记录饮食
-            <Plus size={19} />
-          </button>
-        </section>
-        <section className="card nutrients-card">
-          <div className="card-label">
-            <span>
-              <Leaf size={18} />
-              三大营养素
-            </span>
-            <span className="muted small">已摄入 / 目标</span>
-          </div>
-          <MacroBars total={total} goal={target?.macros} />
-          <p className="helper">
-            {target?.source ?? "设置个人目标后查看每日分配"}
-          </p>
-        </section>
-      </div>
-      <div className="dashboard-grid lower">
-        <section>
-          <SectionHead
-            title="今天的训练"
-            action="查看训练"
-            onAction={() => navigate("training")}
-          />
-          {active ? (
-            <div className="workout-highlight">
-              <span className="pill orange">训练进行中</span>
-              <h3>{active.name}</h3>
-              <p>
-                已完成 {completedSets(active)} 组 · {active.date}
-              </p>
-              <Button onClick={() => navigate("training")}>
-                继续训练
-                <ArrowUpRight size={18} />
-              </Button>
-            </div>
-          ) : scheduled.length ? (
-            <div className="card list-card">
-              {scheduled.map((slot) => (
-                <button
-                  key={slot.id}
-                  className="record-row"
-                  onClick={() => navigate("training")}
-                >
-                  <span className="row-icon">
-                    <Dumbbell size={21} />
-                  </span>
-                  <span>
-                    <b>
-                      {
-                        state.templates.find((t) => t.id === slot.templateId)
-                          ?.name
-                      }
-                    </b>
-                    <small>计划训练 · 点击开始</small>
-                  </span>
-                  <ArrowUpRight size={18} />
-                </button>
-              ))}
-            </div>
-          ) : sessions.length ? (
-            <div className="card list-card">
-              {sessions.map((s) => (
-                <button
-                  className="record-row"
-                  key={s.id}
-                  onClick={() => navigate("training")}
-                >
-                  <span className="row-icon green">
-                    <Dumbbell size={21} />
-                  </span>
-                  <span>
-                    <b>{s.name}</b>
-                    <small>已完成 {completedSets(s)} 组</small>
-                  </span>
-                  <span className="pill">已完成</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="card">
-              <Empty
-                icon={<Dumbbell size={27} />}
-                title="留一点时间给自己"
-                description="添加训练计划，或把今天留给恢复。"
-                action="安排训练"
-                onAction={() => navigate("training")}
-              />
-            </div>
-          )}
-        </section>
-        <section>
-          <SectionHead
-            title="饮食阶段"
-            action="管理阶段"
-            onAction={() => navigate("nutrition")}
-          />
-          <div className="card phase-summary">
-            <span className="phase-mark">{phase?.phase ? "01" : "—"}</span>
-            <div>
-              <h3>{phase?.phase?.name ?? "按自己的节奏调整"}</h3>
-              <p>
-                {phase?.phase
-                  ? `开始于 ${phase.date} · 建议持续 ${phase.phase.days} 天`
-                  : "设置阶段目标，记录每一次调整。碳水渐降方案由你确认后切换。"}
-              </p>
-            </div>
-            <button
-              className="text-button"
-              onClick={() => navigate("nutrition")}
-            >
-              {phase?.phase ? "查看当前方案" : "创建饮食阶段"}
-              <ArrowUpRight size={18} />
-            </button>
-          </div>
-          <div className="local-note">
-            <ShieldCheck size={21} />
-            <p>数据保存在当前浏览器。定期在设置中导出备份，换手机也能恢复。</p>
+          <div className="overview-macros">
+            <MacroBars total={total} goal={target?.macros} />
           </div>
         </section>
       </div>
+      <div className="quick-actions" aria-label="快捷记录">
+        <button onClick={() => navigate("nutrition/add")}>
+          <span className="quick-icon">
+            <Plus size={23} />
+          </span>
+          <span>
+            <b>记录饮食</b>
+            <small>食物与实际份量</small>
+          </span>
+          <ArrowUpRight size={18} />
+        </button>
+        <button onClick={() => navigate("trends/weight")}>
+          <span className="quick-icon">
+            <Scale size={23} />
+          </span>
+          <span>
+            <b>记录体重</b>
+            <small>留下一次变化</small>
+          </span>
+          <ArrowUpRight size={18} />
+        </button>
+      </div>
+      <section className="today-training">
+        <div className="section-head">
+          <h2>今天的训练</h2>
+          <a className="text-button" href="#training">
+            查看安排
+            <ChevronRight size={17} />
+          </a>
+        </div>
+        <button
+          className="training-summary"
+          onClick={() =>
+            navigate(
+              active
+                ? "training/session"
+                : sessions.length
+                  ? "training/history"
+                  : "training",
+            )
+          }
+        >
+          <span className="summary-icon">
+            <Dumbbell size={26} />
+          </span>
+          <span>
+            <b>
+              {active?.name ??
+                (sessions.length
+                  ? `已完成 ${sessions.length} 次训练`
+                  : scheduled.length
+                    ? `${scheduled.length} 项训练安排`
+                    : "今天按自己的节奏来")}
+            </b>
+            <small>
+              {active
+                ? `已完成 ${completedSets(active)} 组，继续记录`
+                : sessions.length
+                  ? "查看本次成绩和训练记录"
+                  : scheduled.length
+                    ? "查看计划，准备开始"
+                    : "选择训练，或留给恢复"}
+            </small>
+          </span>
+          <ChevronRight size={19} />
+        </button>
+      </section>
     </div>
   );
 }

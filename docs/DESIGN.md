@@ -38,3 +38,13 @@ The taste-skill redesign-preserve protocol was applied to the existing product: 
 - The public name, metadata, installation manifest, and new export filenames use FitGo. Existing IndexedDB identifiers, URL, and service-worker cache family remain stable. Both Gym and FitGo backup envelopes can be restored.
 
 Radix Primitives and Fontsource are package dependencies, not standalone installed SKILL.md files. The taste-skill source is the locally available design-taste-frontend skill.
+
+## Task-focused mobile structure
+
+The dashboard contains a combined energy/macro overview, direct food/weight creation actions, and a compact training status. Phase management, extended charts, and template maintenance live on separate screens. The week selector is disclosed on demand.
+
+- Nutrition defaults to the daily diary. The food library and phased plans are separate hash routes with a visible parent link. Meal-specific entry preserves the meal selection. Food entry first selects a food, then shows portion and meal fields; adding a food returns to the same intake draft.
+- Training defaults to a start/resume hub and today's schedule. Templates and history have their own screens. An active session displays one exercise with a selector and previous/next controls. Set data is committed independently of navigation. Notes are disclosed on demand.
+- Trends switches between body, nutrition, and strength. Additional activity estimates are nested under nutrition trends.
+- Hash routes allow direct links, reload recovery, and browser Back without a server router. Existing primary hashes and IndexedDB identifiers remain valid. Route changes restore the page heading focus without stealing focus from an open dialog.
+- Mobile intake actions stay above bottom navigation; compact landscape layouts return them to normal flow. Principal controls retain 44 px touch targets. No sample records are inserted into user storage.

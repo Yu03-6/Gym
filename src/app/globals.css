@@ -2648,3 +2648,639 @@ textarea:hover:not(:disabled) {
     padding-top: 18px;
   }
 }
+
+/* Task-focused navigation: summaries first, management on separate screens. */
+.page-heading {
+  margin: 24px 0;
+  align-items: center;
+}
+.page-heading h1 {
+  font-size: 30px;
+  letter-spacing: -0.8px;
+}
+.page-heading .eyebrow {
+  letter-spacing: 0.2px;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: -10px 0 6px -5px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.date-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.date-tools input {
+  width: 156px;
+  font-size: 16px;
+  min-height: 44px;
+  background: transparent;
+  border-color: var(--border);
+}
+.date-tools .icon-button {
+  color: #56634e;
+}
+.today-view {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 20px 28px;
+  align-items: start;
+}
+.today-view .setup-callout {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+.daily-overview {
+  grid-row: span 2;
+  min-width: 0;
+}
+.today-view .energy-card {
+  padding: 24px;
+  border-radius: 24px;
+}
+.overview-macros {
+  padding-top: 22px;
+  border-top: 1px solid #ffffff24;
+}
+.overview-macros .macro-bars {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.overview-macros .macro > div:first-child {
+  display: block;
+}
+.overview-macros .macro span {
+  color: #dce5d8;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.overview-macros .macro b {
+  font-size: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.overview-macros .macro small {
+  font-size: 11px;
+  color: #c6d2c8;
+}
+.overview-macros .macro span i {
+  display: none;
+}
+.overview-macros .macro i {
+  background: #dce99c;
+}
+.overview-macros .bar {
+  background: #ffffff20;
+  height: 4px;
+}
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.quick-actions > button {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 14px;
+  padding: 20px;
+  min-width: 0;
+}
+.quick-actions > button > svg,
+.training-summary > svg,
+.feature-list a > svg:last-child,
+.resume-training > svg {
+  margin-left: auto;
+  color: #74806c;
+}
+.quick-actions b,
+.training-summary b,
+.feature-list b,
+.resume-training b {
+  display: block;
+  font-size: 16px;
+  font-weight: 650;
+}
+.quick-actions small,
+.training-summary small,
+.feature-list small,
+.resume-training small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.quick-icon,
+.summary-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: #f1f4e9;
+  color: #4d6439;
+  flex-shrink: 0;
+}
+.quick-actions > button:first-child .quick-icon {
+  color: #b63b16;
+  background: #fff0e6;
+}
+.today-training .section-head {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+.training-summary,
+.resume-training {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  text-align: left;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+  background: white;
+}
+.management-shortcuts {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.management-shortcuts a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #dfe4d6;
+  background: #edf1e6;
+  padding: 10px 14px;
+  border-radius: 12px;
+  min-height: 46px;
+  font-size: 14px;
+  color: #41523a;
+}
+.nutrition-top .card > .section-head {
+  margin-bottom: 10px;
+}
+.nutrition-details {
+  margin-top: 4px;
+}
+.nutrition-details summary {
+  color: #4f6045;
+  font-weight: 500;
+}
+.nutrition-details .macro-bars {
+  margin: 16px 0;
+}
+.meal-card .meal-add {
+  padding: 0;
+}
+.meal-card:has(.meal-empty) {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 18px;
+}
+.meal-card:has(.meal-empty) .card-label {
+  margin: 0;
+  gap: 16px;
+}
+.meal-card:has(.meal-empty) .meal-add {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+}
+.meal-card:has(.meal-empty) .meal-empty {
+  padding: 0;
+  margin: 5px 0 0;
+  font-size: 12px;
+}
+.training-intro {
+  padding: 28px;
+  border-radius: 22px;
+  background: #eaf0df;
+  border: 1px solid #dce5cd;
+}
+.training-intro > svg {
+  color: #405b36;
+  margin-bottom: 16px;
+}
+.training-intro h2 {
+  font-size: 25px;
+}
+.training-intro p {
+  color: #5d6e50;
+  font-size: 14px;
+  margin: 8px 0 20px;
+}
+.training-intro .button {
+  background: #294431;
+}
+.feature-list {
+  margin-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.feature-list a {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 21px 5px;
+  border-bottom: 1px solid var(--border);
+}
+.feature-list a > svg:first-child {
+  color: #5e7350;
+}
+.resume-training {
+  background: #eef2e6;
+}
+.resume-training b {
+  margin: 3px 0;
+}
+.screen-tabs {
+  display: flex;
+  padding: 4px;
+  gap: 4px;
+  border-radius: 14px;
+  background: #e9ede2;
+}
+.screen-tabs a {
+  flex: 1;
+  padding: 11px 8px;
+  min-height: 44px;
+  text-align: center;
+  color: #5b6852;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+.screen-tabs a[aria-current="page"] {
+  background: white;
+  color: #294431;
+  box-shadow: 0 2px 6px #293c3010;
+}
+.trends-view .stat-grid {
+  grid-template-columns: 1fr;
+  margin: 16px 0;
+}
+.trends-view .stat {
+  padding: 20px 24px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4px 16px;
+}
+.trends-view .stat > svg {
+  display: none;
+}
+.trends-view .stat p {
+  margin: 0;
+  grid-column: 1;
+}
+.trends-view .stat strong {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  font-size: 34px;
+}
+.trends-view .stat > span {
+  grid-column: 1;
+}
+.trend-content .section-head {
+  margin-top: 0;
+}
+.activity-details {
+  padding: 6px 0;
+}
+.exercise-switcher {
+  display: block;
+  margin: 24px 0 8px;
+}
+.exercise-switcher > span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.exercise-navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0;
+}
+.exercise-navigation .button {
+  flex: 1;
+}
+.workout-notes {
+  margin-bottom: 18px;
+}
+.workout-notes summary {
+  color: var(--muted);
+  font-weight: 500;
+}
+.active-workout .workout-exercise {
+  margin-top: 16px;
+}
+@media (max-width: 820px) {
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--bg);
+  }
+  .today-view {
+    display: block;
+  }
+  .today-view .setup-callout {
+    margin-bottom: 16px;
+  }
+  .today-view .energy-card {
+    padding: 22px;
+    border-radius: 22px;
+  }
+  .quick-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0 22px;
+  }
+  .quick-actions > button {
+    position: relative;
+    padding: 16px;
+    display: block;
+  }
+  .quick-actions > button > svg {
+    position: absolute;
+    top: 20px;
+    right: 15px;
+    width: 16px;
+  }
+  .quick-actions .quick-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    margin-bottom: 12px;
+  }
+  .quick-actions b {
+    font-size: 15px;
+  }
+  .quick-actions small {
+    font-size: 11px;
+  }
+  .training-summary {
+    padding: 16px;
+  }
+  .training-summary b {
+    font-size: 14px;
+  }
+  .management-shortcuts {
+    justify-content: stretch;
+  }
+  .management-shortcuts a {
+    flex: 1;
+    font-size: 13px;
+  }
+  .nutrition-top {
+    display: block;
+  }
+  .nutrition-top .diet-actions {
+    position: fixed;
+    z-index: 11;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 36px);
+    max-width: 672px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 8px;
+    background: #fcfcf8;
+    border: 1px solid #e3e6db;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px #243b301c;
+  }
+  .nutrition-top .diet-actions .button {
+    font-size: 13px;
+    padding: 10px 6px;
+  }
+  .view-enter:has(.diet-actions) {
+    padding-bottom: 70px;
+  }
+  body:has(.diet-actions) .toast {
+    bottom: calc(155px + env(safe-area-inset-bottom));
+  }
+  .training-intro {
+    padding: 24px;
+  }
+  .training-intro .button {
+    width: 100%;
+  }
+  .training-intro p {
+    max-width: 28ch;
+  }
+}
+@media (max-width: 600px) {
+  .page-heading {
+    margin: 18px 0;
+  }
+  .page-heading h1 {
+    font-size: 28px;
+  }
+  .date-tools {
+    gap: 0;
+  }
+  .date-tools input {
+    width: 145px;
+    padding: 8px;
+    font-size: 16px;
+  }
+  .date-tools .icon-button {
+    width: 36px;
+    min-width: 36px;
+  }
+  .today-view .energy-ring {
+    width: 86px;
+    height: 86px;
+    padding: 6px;
+  }
+  .today-view .hero-number {
+    font-size: 48px;
+  }
+  .today-view .energy-breakdown {
+    margin: 20px 0;
+  }
+  .today-view .energy-breakdown b {
+    font-size: 18px;
+  }
+  .today-view .energy-breakdown small {
+    font-size: 10px;
+  }
+  .overview-macros {
+    padding-top: 18px;
+  }
+  .overview-macros .macro-bars {
+    gap: 10px;
+  }
+  .overview-macros .macro b {
+    font-size: 16px;
+  }
+  .overview-macros .macro small {
+    display: block;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+  .today-view .setup-callout {
+    padding: 14px 16px;
+  }
+  .today-view .setup-callout p:not(.eyebrow) {
+    display: none;
+  }
+  .today-view .setup-callout .button {
+    margin-top: 0;
+    min-height: 44px;
+  }
+  .today-training .section-head h2 {
+    font-size: 17px;
+  }
+  .meal-card {
+    padding: 16px;
+  }
+  .meal-grid {
+    gap: 12px;
+  }
+  .detail-heading h1 {
+    font-size: 25px;
+  }
+  .trends-view .stat strong {
+    font-size: 30px;
+  }
+  .trends-view .stat {
+    padding: 18px;
+  }
+  .trends-view .stat p {
+    font-size: 14px;
+  }
+  .trends-view .stat > span {
+    font-size: 11px;
+  }
+  .active-workout {
+    border-radius: 18px;
+  }
+  .exercise-navigation .button {
+    font-size: 13px;
+    padding: 10px 8px;
+  }
+}
+@media (max-height: 480px) {
+  .nutrition-top .diet-actions {
+    position: static;
+    transform: none;
+    width: 100%;
+    margin-top: 16px;
+  }
+  .topbar {
+    position: static;
+  }
+}
+.selected-food {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  background: #eff3e8;
+  border: 1px solid #e0e6d6;
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-align: left;
+  margin-bottom: 22px;
+}
+.selected-food b {
+  display: block;
+  font-size: 16px;
+}
+.selected-food small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.calendar-toggle {
+  border: 0;
+  background: transparent;
+  color: #5b6a50;
+  min-height: 44px;
+  padding: 8px 0 8px 8px;
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  font-size: 12px;
+}
+.page-heading h1:focus {
+  outline: none;
+}
+.training-plan .section-head {
+  margin-top: 22px;
+}
+.training-plan .list-card .rest-day {
+  padding: 18px 0;
+}
+@media (max-width: 820px) {
+  .today-view .card-label {
+    margin-bottom: 16px;
+  }
+  .overview-macros .macro small {
+    display: inline;
+  }
+  .overview-macros .macro b {
+    white-space: normal;
+    font-size: 15px;
+  }
+  .quick-actions > button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+  }
+  .quick-actions > button > svg {
+    display: none;
+  }
+  .quick-actions .quick-icon {
+    margin-bottom: 0;
+  }
+  .quick-actions small {
+    display: none;
+  }
+  .training-intro {
+    position: relative;
+    padding: 23px;
+  }
+  .training-intro > svg {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 24px;
+  }
+  .training-intro h2 {
+    font-size: 23px;
+    padding-right: 28px;
+  }
+  .training-intro p {
+    max-width: none;
+    margin: 12px 0 18px;
+    font-size: 13px;
+  }
+  .training-plan .feature-list {
+    margin-top: 18px;
+  }
+  .view-enter:has(.diet-actions) {
+    animation: none;
+  }
+}

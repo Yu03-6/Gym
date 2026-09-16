@@ -34,6 +34,7 @@ import {
   type Template,
   type TemplateExercise,
 } from "@/lib/model";
+import { goTo, useSection } from "@/lib/navigation";
 import { useStore } from "@/lib/store";
 import {
   Button,
@@ -93,7 +94,12 @@ const makeTarget = (exercise: Exercise): TemplateExercise => ({
 });
 export function Training({ date }: { date: string }) {
   const { state, mutate, notify } = useStore();
-  const [section, setSection] = useState<"plan" | "history">("plan");
+  const [section] = useSection("training", "plan", [
+    "plan",
+    "templates",
+    "history",
+    "session",
+  ] as const);
   const [template, setTemplate] = useState<Template | "new" | null>(null);
   const [exercise, setExercise] = useState(false);
   const [schedule, setSchedule] = useState<string | "new" | null>(null);
@@ -113,32 +119,52 @@ export function Training({ date }: { date: string }) {
     });
     if (ok) {
       notify("训练已开始，每组自动保存");
+      goTo("training/session");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }
   return (
-    <div className="view-enter">
-      {active && <Workout session={active} />}
-      <div className="segmented" role="tablist" aria-label="训练栏目">
-        <button
-          role="tab"
-          aria-selected={section === "plan"}
-          onClick={() => setSection("plan")}
-        >
-          训练计划
-        </button>
-        <button
-          role="tab"
-          aria-selected={section === "history"}
-          onClick={() => setSection("history")}
-        >
-          训练历史
-        </button>
-      </div>
-      {section === "plan" ? (
+    <div className={`view-enter training-view training-${section}`}>
+      {section === "session" &&
+        (active ? (
+          <Workout session={active} />
+        ) : (
+          <div className="card">
+            <Empty
+              icon={<Dumbbell size={28} />}
+              title="当前没有进行中的训练"
+              description="选择一个模板，开始本次训练。"
+              action="选择训练"
+              onAction={() => goTo("training/templates")}
+            />
+          </div>
+        ))}
+      {section === "plan" && (
         <>
+          {active ? (
+            <a className="resume-training" href="#training/session">
+              <span className="summary-icon">
+                <Timer size={25} />
+              </span>
+              <span>
+                <small>训练进行中</small>
+                <b>{active.name}</b>
+                <small>已完成 {completedSets(active)} 组，点击继续</small>
+              </span>
+              <ChevronRight size={21} />
+            </a>
+          ) : (
+            <div className="training-intro">
+              <Dumbbell size={30} />
+              <h2>准备好下一组。</h2>
+              <p>选择你的训练模板，逐组记录每一次进步。</p>
+              <Button onClick={() => goTo("training/templates")}>
+                选择训练
+                <ChevronRight size={19} />
+              </Button>
+            </div>
+          )}
           <SectionHead
-            eyebrow="ON YOUR CALENDAR"
             title={`${date === today() ? "今天" : date.slice(5)}的安排`}
             action="安排训练"
             onAction={() => setSchedule("new")}
@@ -192,8 +218,29 @@ export function Training({ date }: { date: string }) {
               </p>
             )}
           </div>
+          <nav className="feature-list" aria-label="训练管理">
+            <a href="#training/templates">
+              <Dumbbell size={22} />
+              <span>
+                <b>训练模板</b>
+                <small>动作、组数与目标重量</small>
+              </span>
+              <ChevronRight size={19} />
+            </a>
+            <a href="#training/history">
+              <History size={22} />
+              <span>
+                <b>训练历史</b>
+                <small>查看和更正已完成的训练</small>
+              </span>
+              <ChevronRight size={19} />
+            </a>
+          </nav>
+        </>
+      )}
+      {section === "templates" && (
+        <>
           <SectionHead
-            eyebrow="YOUR PROGRAMS"
             title="我的训练模板"
             action="新建模板"
             onAction={() => setTemplate("new")}
@@ -280,9 +327,10 @@ export function Training({ date }: { date: string }) {
             </Button>
           </div>
         </>
-      ) : (
+      )}
+      {section === "history" && (
         <>
-          <SectionHead eyebrow="WORKOUT LOG" title="每一次，都留下记录" />
+          <SectionHead title="已完成的训练" />
           <div className="card list-card">
             {state.sessions
               .filter((s) => s.status === "completed")
@@ -733,6 +781,12 @@ function ScheduleForm({
   );
 }
 function Workout({ session }: { session: Session }) {
+  const [exerciseIndex, setExerciseIndex] = useState(() =>
+    Math.max(
+      0,
+      session.exercises.findIndex((e) => e.sets.some((set) => !set.done)),
+    ),
+  );
   const { state, mutate, notify, saving } = useStore();
   const [note, setNote] = useState(session.note);
   const [now, setNow] = useState(Date.now());
@@ -814,10 +868,26 @@ function Workout({ session }: { session: Session }) {
           </button>
         )}
       </div>
-      <p className="helper">
-        每次修改自动保存。锁屏后再次打开，会按实际结束时间恢复计时；不保证后台铃声。
-      </p>
+      <label className="exercise-switcher">
+        <span>
+          动作 {exerciseIndex + 1} / {session.exercises.length}
+        </span>
+        <select
+          aria-label="当前动作"
+          value={exerciseIndex}
+          disabled={saving}
+          onChange={(e) => setExerciseIndex(Number(e.target.value))}
+        >
+          {session.exercises.map((item, index) => (
+            <option value={index} key={item.id}>
+              {index + 1}. {item.exercise.name} ·{" "}
+              {item.sets.filter((s) => s.done).length}/{item.sets.length} 组
+            </option>
+          ))}
+        </select>
+      </label>
       {session.exercises.map((item, index) => {
+        if (index !== exerciseIndex) return null;
         const previous = state.sessions
           .filter(
             (s) => s.status === "completed" && s.startedAt < session.startedAt,
@@ -995,19 +1065,42 @@ function Workout({ session }: { session: Session }) {
           </div>
         );
       })}
-      <Field label="本次训练备注">
-        <textarea
-          value={note}
-          rows={2}
-          maxLength={1000}
-          onChange={(e) => {
-            setNote(e.target.value);
-            void update((s) => {
-              s.note = e.target.value;
-            });
-          }}
-        />
-      </Field>
+      <div className="exercise-navigation">
+        <Button
+          variant="secondary"
+          disabled={exerciseIndex === 0 || saving}
+          onClick={() => setExerciseIndex(exerciseIndex - 1)}
+        >
+          上一个动作
+        </Button>
+        <Button
+          variant="secondary"
+          disabled={exerciseIndex >= session.exercises.length - 1 || saving}
+          onClick={() => setExerciseIndex(exerciseIndex + 1)}
+        >
+          下一个动作
+          <ChevronRight size={17} />
+        </Button>
+      </div>
+      <details className="workout-notes">
+        <summary>训练备注与计时说明</summary>
+        <p className="helper">
+          每次修改自动保存。锁屏后按结束时间恢复计时，不保证后台铃声。
+        </p>
+        <Field label="本次训练备注">
+          <textarea
+            value={note}
+            rows={2}
+            maxLength={1000}
+            onChange={(e) => {
+              setNote(e.target.value);
+              void update((s) => {
+                s.note = e.target.value;
+              });
+            }}
+          />
+        </Field>
+      </details>
       <FormError message={error} />
       <div className="workout-finish">
         <Button
@@ -1037,6 +1130,7 @@ function Workout({ session }: { session: Session }) {
             setBusy(false);
             if (ok) {
               notify("训练已保存，做得不错");
+              goTo("training/history");
               setFinish(false);
             }
           }}
@@ -1055,6 +1149,7 @@ function Workout({ session }: { session: Session }) {
               })
             ) {
               notify("已放弃本次训练");
+              goTo("training");
               setDiscard(false);
             }
           }}

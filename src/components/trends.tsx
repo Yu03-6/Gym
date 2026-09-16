@@ -1,5 +1,5 @@
 "use client";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   Activity,
   ArrowDownRight,
@@ -10,6 +10,7 @@ import {
   Trash2,
   TrendingUp,
 } from "lucide-react";
+import { goTo, useSection } from "@/lib/navigation";
 import { useStore } from "@/lib/store";
 import {
   completedSets,
@@ -31,6 +32,16 @@ import {
 } from "./ui";
 export function Trends({ date }: { date: string }) {
   const { state, mutate } = useStore();
+  const [section] = useSection("trends", "body", [
+    "body",
+    "nutrition",
+    "strength",
+    "weight",
+  ] as const);
+  const body = section === "body" || section === "weight";
+  useEffect(() => {
+    setWeight(section === "weight");
+  }, [section]);
   const [weight, setWeight] = useState(false);
   const [activity, setActivity] = useState(false);
   const [range, setRange] = useState(30);
@@ -77,7 +88,24 @@ export function Trends({ date }: { date: string }) {
   });
   const ceiling = Math.max(1, ...bars.flatMap((b) => [b.total, b.target ?? 0]));
   return (
-    <div className="view-enter">
+    <div className="view-enter trends-view">
+      <nav className="screen-tabs" aria-label="趋势分类">
+        <a href="#trends" aria-current={body ? "page" : undefined}>
+          身体变化
+        </a>
+        <a
+          href="#trends/nutrition"
+          aria-current={section === "nutrition" ? "page" : undefined}
+        >
+          饮食趋势
+        </a>
+        <a
+          href="#trends/strength"
+          aria-current={section === "strength" ? "page" : undefined}
+        >
+          训练表现
+        </a>
+      </nav>
       <div className="section-head">
         <div
           className="segmented compact"
@@ -94,225 +122,258 @@ export function Trends({ date }: { date: string }) {
             </button>
           ))}
         </div>
-        <Button variant="secondary" onClick={() => setWeight(true)}>
-          <Plus size={17} />
-          记录体重
-        </Button>
+        {body && (
+          <Button variant="secondary" onClick={() => setWeight(true)}>
+            <Plus size={17} />
+            记录体重
+          </Button>
+        )}
       </div>
       <div className="stat-grid">
-        <div className="card stat">
-          <Scale size={20} />
-          <p>7 日体重均值</p>
-          <strong>
-            {average ? round(average, 1) : "—"}
-            <small>kg</small>
-          </strong>
-          <span>基于最近 7 天的 {recent.length} 次记录</span>
-        </div>
-        <div className="card stat">
-          <Dumbbell size={20} />
-          <p>已完成训练</p>
-          <strong>
-            {sessions.length}
-            <small>次</small>
-          </strong>
-          <span>
-            共 {sessions.reduce((s, w) => s + completedSets(w), 0)} 个正式组
-          </span>
-        </div>
-        <div className="card stat">
-          <Activity size={20} />
-          <p>饮食记录天数</p>
-          <strong>
-            {loggedDays.size}
-            <small>/ {range}</small>
-          </strong>
-          <span>有记录不代表全天饮食完整</span>
-        </div>
+        {body && (
+          <div className="card stat">
+            <Scale size={20} />
+            <p>7 日体重均值</p>
+            <strong>
+              {average ? round(average, 1) : "—"}
+              <small>kg</small>
+            </strong>
+            <span>基于最近 7 天的 {recent.length} 次记录</span>
+          </div>
+        )}
+        {section === "strength" && (
+          <div className="card stat">
+            <Dumbbell size={20} />
+            <p>已完成训练</p>
+            <strong>
+              {sessions.length}
+              <small>次</small>
+            </strong>
+            <span>
+              共 {sessions.reduce((s, w) => s + completedSets(w), 0)} 个正式组
+            </span>
+          </div>
+        )}
+        {section === "nutrition" && (
+          <div className="card stat">
+            <Activity size={20} />
+            <p>饮食记录天数</p>
+            <strong>
+              {loggedDays.size}
+              <small>/ {range}</small>
+            </strong>
+            <span>有记录不代表全天饮食完整</span>
+          </div>
+        )}
       </div>
-      <div className="dashboard-grid">
-        <section className="card">
-          <SectionHead eyebrow="BODY WEIGHT" title="看趋势，不看单日波动" />
-          {weights.length >= 2 ? (
-            <WeightChart values={weights} />
+      <div className="trend-content">
+        {body && (
+          <section className="card">
+            <SectionHead eyebrow="BODY WEIGHT" title="看趋势，不看单日波动" />
+            {weights.length >= 2 ? (
+              <WeightChart values={weights} />
+            ) : (
+              <Empty
+                icon={<TrendingUp size={26} />}
+                title={weights.length ? "再记一次，看见趋势" : "还没有体重记录"}
+                description="尽量在相近时间、相同条件下称重。至少两条记录后展示曲线。"
+              />
+            )}
+            <details>
+              <summary>查看与更正体重记录（{weights.length}）</summary>
+              <div className="measurement-list">
+                {weights.map((w) => (
+                  <div key={w.id}>
+                    <span>{w.date}</span>
+                    <b>
+                      {round(w.weight, 1)} kg
+                      {w.waist ? ` · 腰围 ${w.waist} cm` : ""}
+                    </b>
+                    <button
+                      className="icon-button"
+                      aria-label={`删除${w.date}体重`}
+                      onClick={() => {
+                        if (
+                          confirm(
+                            "删除该日期的体重记录？不会修改已设定的营养目标。",
+                          )
+                        )
+                          void mutate((s) => {
+                            s.weights = s.weights.filter((x) => x.id !== w.id);
+                          });
+                      }}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <p className="helper">更正记录：选择同一日期重新记录体重即可。</p>
+            </details>
+          </section>
+        )}
+        {section === "nutrition" && (
+          <section className="card">
+            <SectionHead eyebrow="LAST 7 DAYS" title="摄入与目标" />
+            <div className="chart-legend">
+              <span>
+                <i className="actual" />
+                实际摄入
+              </span>
+              <span>
+                <i className="goal" />
+                当天目标
+              </span>
+            </div>
+            <div
+              className="intake-chart"
+              role="img"
+              aria-label="最近七天摄入与目标，详细数值见下方表格"
+            >
+              {bars.map((b) => (
+                <div key={b.date}>
+                  <div className="bar-pair">
+                    <i
+                      className="actual"
+                      style={{ height: `${(b.total / ceiling) * 100}%` }}
+                    />
+                    <i
+                      className="goal"
+                      style={{
+                        height: `${((b.target ?? 0) / ceiling) * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <span>{Number(b.date.slice(-2))}</span>
+                </div>
+              ))}
+            </div>
+            <details>
+              <summary>查看每日数值</summary>
+              <div className="measurement-list">
+                {bars.map((b) => (
+                  <div key={b.date}>
+                    <span>{b.date.slice(5)}</span>
+                    <b>
+                      {b.recorded ? `${round(b.total)} kcal` : "未记录"} /{" "}
+                      {b.target ? round(b.target) : "—"}
+                    </b>
+                  </div>
+                ))}
+              </div>
+            </details>
+            <p className="helper">
+              无记录的日期不按零摄入判断；目前不自动根据体重波动削减热量。
+            </p>
+          </section>
+        )}
+      </div>
+      {section === "strength" && (
+        <>
+          <SectionHead eyebrow="STRENGTH LOG" title="同一动作，持续对照" />
+          {exerciseMap.size ? (
+            <section className="card">
+              <Field label="选择动作">
+                <select
+                  value={exerciseId}
+                  onChange={(e) => setSelected(e.target.value)}
+                >
+                  {[...exerciseMap.values()].map((e) => (
+                    <option key={e.id} value={e.id}>
+                      {e.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <div className="measurement-list">
+                {exerciseRows.map((r, i) => (
+                  <div key={`${r.date}-${i}`}>
+                    <span>{r.date}</span>
+                    <b>
+                      {r.exercise.sets
+                        .filter((s) => s.done && !s.warmup)
+                        .map((s) =>
+                          r.exercise.exercise.mode === "timed"
+                            ? `${s.seconds}秒`
+                            : r.exercise.exercise.mode === "bodyweight"
+                              ? `${s.reps}次`
+                              : `${s.weight}kg × ${s.reps}`,
+                        )
+                        .join(" / ") || "无正式组"}
+                    </b>
+                  </div>
+                ))}
+              </div>
+              <p className="helper">
+                对照相同动作与记录方式。辅助重量越小代表帮助越少；不同动作的训练量不直接比较。
+              </p>
+            </section>
           ) : (
-            <Empty
-              icon={<TrendingUp size={26} />}
-              title={weights.length ? "再记一次，看见趋势" : "还没有体重记录"}
-              description="尽量在相近时间、相同条件下称重。至少两条记录后展示曲线。"
-            />
+            <div className="card">
+              <Empty
+                icon={<Dumbbell size={26} />}
+                title="完成训练后查看动作历史"
+                description="每次实际重量、次数和秒数都会保留，帮助你决定下一次的目标。"
+              />
+            </div>
           )}
-          <details>
-            <summary>查看与更正体重记录（{weights.length}）</summary>
-            <div className="measurement-list">
-              {weights.map((w) => (
-                <div key={w.id}>
-                  <span>{w.date}</span>
-                  <b>
-                    {round(w.weight, 1)} kg
-                    {w.waist ? ` · 腰围 ${w.waist} cm` : ""}
-                  </b>
+        </>
+      )}
+      {section === "nutrition" && (
+        <details className="activity-details">
+          <summary>管理当天活动消耗</summary>
+          <SectionHead
+            title="当天活动消耗"
+            action="添加活动"
+            onAction={() => setActivity(true)}
+          />
+          <div className="card list-card">
+            {state.activities
+              .filter((a) => a.date === date)
+              .map((a) => (
+                <div key={a.id} className="record-row">
+                  <span className="row-icon">
+                    <Activity size={20} />
+                  </span>
+                  <span className="row-main">
+                    <b>{a.name}</b>
+                    <small>净运动消耗估算 · {a.calories} kcal</small>
+                  </span>
                   <button
                     className="icon-button"
-                    aria-label={`删除${w.date}体重`}
-                    onClick={() => {
-                      if (
-                        confirm(
-                          "删除该日期的体重记录？不会修改已设定的营养目标。",
-                        )
-                      )
-                        void mutate((s) => {
-                          s.weights = s.weights.filter((x) => x.id !== w.id);
-                        });
-                    }}
+                    aria-label={`删除${a.name}`}
+                    onClick={() =>
+                      mutate((s) => {
+                        s.activities = s.activities.filter(
+                          (x) => x.id !== a.id,
+                        );
+                      })
+                    }
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={17} />
                   </button>
                 </div>
               ))}
-            </div>
-            <p className="helper">更正记录：选择同一日期重新记录体重即可。</p>
-          </details>
-        </section>
-        <section className="card">
-          <SectionHead eyebrow="LAST 7 DAYS" title="摄入与目标" />
-          <div className="chart-legend">
-            <span>
-              <i className="actual" />
-              实际摄入
-            </span>
-            <span>
-              <i className="goal" />
-              当天目标
-            </span>
-          </div>
-          <div
-            className="intake-chart"
-            role="img"
-            aria-label="最近七天摄入与目标，详细数值见下方表格"
-          >
-            {bars.map((b) => (
-              <div key={b.date}>
-                <div className="bar-pair">
-                  <i
-                    className="actual"
-                    style={{ height: `${(b.total / ceiling) * 100}%` }}
-                  />
-                  <i
-                    className="goal"
-                    style={{ height: `${((b.target ?? 0) / ceiling) * 100}%` }}
-                  />
-                </div>
-                <span>{Number(b.date.slice(-2))}</span>
-              </div>
-            ))}
-          </div>
-          <details>
-            <summary>查看每日数值</summary>
-            <div className="measurement-list">
-              {bars.map((b) => (
-                <div key={b.date}>
-                  <span>{b.date.slice(5)}</span>
-                  <b>
-                    {b.recorded ? `${round(b.total)} kcal` : "未记录"} /{" "}
-                    {b.target ? round(b.target) : "—"}
-                  </b>
-                </div>
-              ))}
-            </div>
-          </details>
-          <p className="helper">
-            无记录的日期不按零摄入判断；目前不自动根据体重波动削减热量。
-          </p>
-        </section>
-      </div>
-      <SectionHead eyebrow="STRENGTH LOG" title="同一动作，持续对照" />
-      {exerciseMap.size ? (
-        <section className="card">
-          <Field label="选择动作">
-            <select
-              value={exerciseId}
-              onChange={(e) => setSelected(e.target.value)}
-            >
-              {[...exerciseMap.values()].map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <div className="measurement-list">
-            {exerciseRows.map((r, i) => (
-              <div key={`${r.date}-${i}`}>
-                <span>{r.date}</span>
-                <b>
-                  {r.exercise.sets
-                    .filter((s) => s.done && !s.warmup)
-                    .map((s) =>
-                      r.exercise.exercise.mode === "timed"
-                        ? `${s.seconds}秒`
-                        : r.exercise.exercise.mode === "bodyweight"
-                          ? `${s.reps}次`
-                          : `${s.weight}kg × ${s.reps}`,
-                    )
-                    .join(" / ") || "无正式组"}
-                </b>
-              </div>
-            ))}
+            {!state.activities.some((a) => a.date === date) && (
+              <p className="rest-day">
+                尚无额外活动记录。力量训练不会被自动换算为精确热量。
+              </p>
+            )}
           </div>
           <p className="helper">
-            对照相同动作与记录方式。辅助重量越小代表帮助越少；不同动作的训练量不直接比较。
+            只有“另记净运动消耗”模式会将这里的数值加到消耗估算中。它不会自动增加摄入目标；不要填手表的全天总消耗。
           </p>
-        </section>
-      ) : (
-        <div className="card">
-          <Empty
-            icon={<Dumbbell size={26} />}
-            title="完成训练后查看动作历史"
-            description="每次实际重量、次数和秒数都会保留，帮助你决定下一次的目标。"
-          />
-        </div>
+        </details>
       )}
-      <SectionHead
-        title="当天活动消耗"
-        action="添加活动"
-        onAction={() => setActivity(true)}
-      />
-      <div className="card list-card">
-        {state.activities
-          .filter((a) => a.date === date)
-          .map((a) => (
-            <div key={a.id} className="record-row">
-              <span className="row-icon">
-                <Activity size={20} />
-              </span>
-              <span className="row-main">
-                <b>{a.name}</b>
-                <small>净运动消耗估算 · {a.calories} kcal</small>
-              </span>
-              <button
-                className="icon-button"
-                aria-label={`删除${a.name}`}
-                onClick={() =>
-                  mutate((s) => {
-                    s.activities = s.activities.filter((x) => x.id !== a.id);
-                  })
-                }
-              >
-                <Trash2 size={17} />
-              </button>
-            </div>
-          ))}
-        {!state.activities.some((a) => a.date === date) && (
-          <p className="rest-day">
-            尚无额外活动记录。力量训练不会被自动换算为精确热量。
-          </p>
-        )}
-      </div>
-      <p className="helper">
-        只有“另记净运动消耗”模式会将这里的数值加到消耗估算中。它不会自动增加摄入目标；不要填手表的全天总消耗。
-      </p>
-      {weight && <WeightForm date={date} onClose={() => setWeight(false)} />}{" "}
+      {weight && (
+        <WeightForm
+          date={date}
+          onClose={() => {
+            setWeight(false);
+            if (section === "weight") goTo("trends");
+          }}
+        />
+      )}{" "}
       {activity && (
         <ActivityForm date={date} onClose={() => setActivity(false)} />
       )}

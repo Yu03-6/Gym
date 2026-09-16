@@ -1,5 +1,5 @@
 "use client";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   Archive,
   ArrowUpRight,
@@ -13,6 +13,7 @@ import {
   Trash2,
   Utensils,
 } from "lucide-react";
+import { goTo, useSection } from "@/lib/navigation";
 import { useStore } from "@/lib/store";
 import {
   energy,
@@ -60,7 +61,21 @@ export function Nutrition({
   onSetup: () => void;
 }) {
   const { state, mutate, notify } = useStore();
-  const [section, setSection] = useState<"diary" | "foods" | "phases">("diary");
+  const [section] = useSection("nutrition", "diary", [
+    "diary",
+    "foods",
+    "phases",
+    "add",
+  ] as const);
+  const diary = section === "diary" || section === "add";
+  const [meal, setMeal] = useState<FoodLog["meal"]>("lunch");
+  useEffect(() => {
+    setLog(section === "add" ? "new" : null);
+  }, [section]);
+  function closeLog() {
+    setLog(null);
+    if (section === "add") goTo("nutrition");
+  }
   const [log, setLog] = useState<FoodLog | "new" | null>(null);
   const [food, setFood] = useState<Food | "new" | null>(null);
   const [phase, setPhase] = useState<Phase | "new" | null>(null);
@@ -102,25 +117,21 @@ export function Nutrition({
   }
   return (
     <div className="view-enter">
-      <div className="segmented" role="tablist" aria-label="饮食栏目">
-        {(
-          [
-            { id: "diary", label: "饮食记录" },
-            { id: "foods", label: "我的食物" },
-            { id: "phases", label: "阶段计划" },
-          ] as const
-        ).map((t) => (
-          <button
-            role="tab"
-            aria-selected={section === t.id}
-            key={t.id}
-            onClick={() => setSection(t.id)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-      {section === "diary" && (
+      {diary && (
+        <nav className="management-shortcuts" aria-label="饮食管理">
+          <a href="#nutrition/foods">
+            <Utensils size={18} />
+            我的食物
+            <ArrowUpRight size={16} />
+          </a>
+          <a href="#nutrition/phases">
+            <Leaf size={18} />
+            阶段计划
+            <ArrowUpRight size={16} />
+          </a>
+        </nav>
+      )}
+      {diary && (
         <>
           <div className="nutrition-top">
             <section className="card">
@@ -137,7 +148,10 @@ export function Nutrition({
                 </div>
                 <Leaf className="accent" size={28} />
               </div>
-              <MacroBars total={total} goal={target?.macros} />
+              <details className="nutrition-details">
+                <summary>查看营养分配</summary>
+                <MacroBars total={total} goal={target?.macros} />
+              </details>
               {target ? (
                 <div className="target-note">
                   <span>{target.source}</span>
@@ -176,7 +190,6 @@ export function Nutrition({
                 <Copy size={18} />
                 复制某天记录
               </Button>
-              <p>只记录实际吃下的食物。常用食物和份量可以随时修改。</p>
             </section>
           </div>
           <SectionHead title="当天饮食" />
@@ -199,6 +212,17 @@ export function Nutrition({
                       <small>kcal</small>
                     </b>
                   </div>
+                  <button
+                    className="meal-add text-button"
+                    aria-label={`记录${label}`}
+                    onClick={() => {
+                      setMeal(key as FoodLog["meal"]);
+                      setLog("new");
+                    }}
+                  >
+                    <Plus size={17} />
+                    记录{label}
+                  </button>
                   {entries.length ? (
                     entries.map((l) => (
                       <div className="food-row" key={l.id}>
@@ -389,11 +413,9 @@ export function Nutrition({
         <LogForm
           entry={log === "new" ? undefined : log}
           date={date}
-          onClose={() => setLog(null)}
-          onCreate={() => {
-            setLog(null);
-            setFood("new");
-          }}
+          defaultMeal={meal}
+          onClose={closeLog}
+          onCreate={() => setFood("new")}
         />
       )}
       {food && (
@@ -594,13 +616,19 @@ function LogForm({
   date,
   onClose,
   onCreate,
+  defaultMeal = "lunch",
 }: {
   entry?: FoodLog;
   date: string;
   onClose: () => void;
   onCreate: () => void;
+  defaultMeal?: FoodLog["meal"];
 }) {
   const { state, mutate, notify } = useStore();
+  const [choosing, setChoosing] = useState(!entry);
+  const [mealSelection, setMealSelection] = useState(
+    entry?.meal ?? defaultMeal,
+  );
   const [selected, setSelected] = useState(entry?.food.id ?? "");
   const [search, setSearch] = useState("");
   const [amount, setAmount] = useState(entry?.amount.toString() ?? "");
@@ -650,94 +678,129 @@ function LogForm({
   }
   return (
     <Modal
-      title={entry ? "编辑饮食记录" : "记录食物"}
+      title={choosing ? "选择食物" : entry ? "编辑饮食记录" : "记录食物"}
       description={date}
       onClose={onClose}
     >
       <form onSubmit={save}>
-        <Field label="餐次">
-          <select name="meal" defaultValue={entry?.meal ?? "lunch"}>
-            {Object.entries(meals).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <div className="search">
-          <Search size={18} />
-          <input
-            aria-label="搜索食物"
-            placeholder="搜索你的食物库"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="food-picker" role="group" aria-label="选择食物">
-          {entry && !options.some((f) => f.id === entry.food.id) && (
-            <button
-              type="button"
-              className={selected === entry.food.id ? "selected" : ""}
-              onClick={() => setSelected(entry.food.id)}
-            >
-              {entry.food.name} · 历史营养值
+        {choosing ? (
+          <>
+            <div className="search">
+              <Search size={18} />
+              <input
+                aria-label="搜索食物"
+                placeholder="搜索你的食物库"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <div className="food-picker" role="group" aria-label="选择食物">
+              {entry && !options.some((f) => f.id === entry.food.id) && (
+                <button
+                  type="button"
+                  className={selected === entry.food.id ? "selected" : ""}
+                  onClick={() => {
+                    setSelected(entry.food.id);
+                    setChoosing(false);
+                  }}
+                >
+                  {entry.food.name} · 历史营养值
+                </button>
+              )}
+              {options.map((f) => (
+                <button
+                  type="button"
+                  key={f.id}
+                  className={selected === f.id ? "selected" : ""}
+                  onClick={() => {
+                    setSelected(f.id);
+                    setChoosing(false);
+                  }}
+                >
+                  <span>
+                    {f.name}
+                    <small>
+                      {states[f.state]} · {round(f.per100.calories)} kcal / 100{" "}
+                      {f.unit}
+                    </small>
+                  </span>
+                  {selected === f.id && <Check size={18} />}
+                </button>
+              ))}
+            </div>
+            {!options.length && (
+              <p className="helper">
+                暂无匹配食物。先按营养标签添加，之后可重复使用。
+              </p>
+            )}
+            <button className="text-button" type="button" onClick={onCreate}>
+              <Plus size={17} />
+              新增食物
             </button>
-          )}
-          {options.map((f) => (
+          </>
+        ) : (
+          <>
             <button
               type="button"
-              key={f.id}
-              className={selected === f.id ? "selected" : ""}
-              onClick={() => setSelected(f.id)}
+              className="selected-food"
+              onClick={() => setChoosing(true)}
             >
               <span>
-                {f.name}
+                <b>{food?.name}</b>
                 <small>
-                  {states[f.state]} · {round(f.per100.calories)} kcal / 100{" "}
-                  {f.unit}
+                  {food
+                    ? `${states[food.state]} · ${round(food.per100.calories)} kcal / 100 ${food.unit}`
+                    : "重新选择食物"}
                 </small>
               </span>
-              {selected === f.id && <Check size={18} />}
+              <span className="text-button">更换</span>
             </button>
-          ))}
-        </div>
-        {!options.length && (
-          <p className="helper">
-            暂无匹配食物。先按营养标签添加，之后可重复使用。
-          </p>
+            <Field label="餐次">
+              <select
+                name="meal"
+                value={mealSelection}
+                onChange={(e) =>
+                  setMealSelection(e.target.value as FoodLog["meal"])
+                }
+              >
+                {Object.entries(meals).map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label={`实际份量 · ${food?.unit ?? "g / ml"}`}>
+              <input
+                type="number"
+                inputMode="decimal"
+                min="0.1"
+                max="10000"
+                step="0.1"
+                required
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+            </Field>
+            {food && Number(amount) > 0 && (
+              <div className="note">
+                <Leaf size={18} />
+                <span>
+                  {round((food.per100.calories * Number(amount)) / 100)} kcal ·
+                  蛋白 {round((food.per100.protein * Number(amount)) / 100, 1)}{" "}
+                  g · 碳水{" "}
+                  {round((food.per100.carbs * Number(amount)) / 100, 1)} g ·
+                  脂肪 {round((food.per100.fat * Number(amount)) / 100, 1)} g
+                </span>
+              </div>
+            )}
+            <FormError message={error} />
+            <Button className="full" type="submit" disabled={busy}>
+              <Check size={18} />
+              保存记录
+            </Button>
+          </>
         )}
-        <button className="text-button" type="button" onClick={onCreate}>
-          <Plus size={17} />
-          新增食物
-        </button>
-        <Field label={`实际份量 · ${food?.unit ?? "g / ml"}`}>
-          <input
-            type="number"
-            inputMode="decimal"
-            min="0.1"
-            max="10000"
-            step="0.1"
-            required
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-        </Field>
-        {food && Number(amount) > 0 && (
-          <div className="note">
-            <Leaf size={18} />
-            <span>
-              {round((food.per100.calories * Number(amount)) / 100)} kcal · 蛋白{" "}
-              {round((food.per100.protein * Number(amount)) / 100, 1)} g · 碳水{" "}
-              {round((food.per100.carbs * Number(amount)) / 100, 1)} g · 脂肪{" "}
-              {round((food.per100.fat * Number(amount)) / 100, 1)} g
-            </span>
-          </div>
-        )}
-        <FormError message={error} />
-        <Button className="full" type="submit" disabled={busy}>
-          <Check size={18} />
-          保存记录
-        </Button>
       </form>
     </Modal>
   );

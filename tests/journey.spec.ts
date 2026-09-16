@@ -19,7 +19,7 @@ test("mobile journal: real inputs, history, interruption and backup recovery", a
     .getByRole("navigation", { name: "手机主导航" })
     .getByRole("link", { name: "饮食" })
     .click();
-  await page.getByRole("tab", { name: "我的食物" }).click();
+  await page.getByRole("link", { name: "我的食物" }).click();
   await page
     .getByRole("button", { name: "新增食物", exact: true })
     .first()
@@ -30,7 +30,7 @@ test("mobile journal: real inputs, history, interruption and backup recovery", a
   await page.locator('input[name="fat"]').fill("5");
   await page.getByRole("button", { name: "保存食物" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await page.getByRole("tab", { name: "饮食记录" }).click();
+  await page.getByRole("link", { name: "返回饮食" }).click();
   await page.getByRole("button", { name: "记录食物", exact: true }).click();
   await page
     .getByRole("group", { name: "选择食物" })
@@ -44,6 +44,7 @@ test("mobile journal: real inputs, history, interruption and backup recovery", a
     .getByRole("navigation", { name: "手机主导航" })
     .getByRole("link", { name: "训练" })
     .click();
+  await page.getByRole("link", { name: /训练模板/ }).click();
   await page.getByRole("button", { name: "新建模板", exact: true }).click();
   await page.getByLabel("模板名称").fill("上肢训练");
   await page.getByLabel("添加动作").selectOption("standard-bench-press");
@@ -76,7 +77,7 @@ test("mobile journal: real inputs, history, interruption and backup recovery", a
   await page.getByRole("button", { name: "结束并保存训练" }).click();
   await page.getByRole("button", { name: "确认", exact: true }).click();
   await expect(page.locator(".active-workout")).toHaveCount(0);
-  await page.getByRole("tab", { name: "训练历史" }).click();
+  await expect(page).toHaveURL(/#training\/history$/);
   await page.getByRole("button", { name: /上肢训练.*已|上肢训练.*组/ }).click();
   await expect(page.getByRole("dialog")).toContainText("1,080 kg");
   await page.getByRole("button", { name: "关闭", exact: true }).click();
@@ -112,6 +113,7 @@ test("mobile journal: real inputs, history, interruption and backup recovery", a
     .getByRole("navigation", { name: "手机主导航" })
     .getByRole("link", { name: "趋势" })
     .click();
+  await page.getByRole("link", { name: "训练表现", exact: true }).click();
   await expect(page.getByText("同一动作，持续对照")).toBeVisible();
   expect(
     await page.evaluate(

@@ -23,3 +23,7 @@ GitHub Actions successfully tested, built, and deployed https://yu03-6.github.io
 ## FitGo UI refresh
 
 The static production build and 11 data/storage tests passed, including legacy Gym backup import and FitGo backup round trips. Chromium passed the journal, layout, phase, keyboard-dialog, and offline scenarios. WebKit passed the journal, layout, phase, and keyboard-dialog scenarios. Mobile screenshot review covered the first-run dashboard and settings sheet. Physical iPhone verification remains outstanding.
+
+## Task-focused navigation revision
+
+Production static export and TypeScript compilation passed. Chromium passed seven browser scenarios including direct entry, browser Back, library reload, meal-specific intake, food creation return, single-exercise training, and saved sets across navigation. WebKit passed the six online scenarios. Eight screens were checked at widths 360, 390, and 844 px without horizontal overflow. Screenshots were inspected for mobile dashboard, diary, training hub, body trends, and a populated dashboard in an isolated test browser. No physical iPhone was used.
