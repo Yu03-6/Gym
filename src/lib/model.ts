@@ -120,6 +120,22 @@ export const sessionSchema = z.object({
     .min(1)
     .max(40),
   restEndsAt: num(1, 1e15).nullable(),
+  restTimer: z
+    .object({
+      id,
+      exerciseId: id,
+      setId: id.nullable(),
+      kind: z.enum(["set", "exercise"]),
+      notifiedAt: num(1, 1e15).nullable(),
+    })
+    .nullable()
+    .default(null),
+  lastCompleted: z
+    .object({ exerciseId: id, setId: id })
+    .nullable()
+    .default(null),
+  currentExerciseId: id.nullable().default(null),
+  soundEnabled: z.boolean().default(true),
 });
 export type Session = z.infer<typeof sessionSchema>;
 export const phaseSchema = z.object({
@@ -226,6 +242,25 @@ export const stateSchema = z
         });
       if (session.endedAt && session.endedAt < session.startedAt)
         ctx.addIssue({ code: "custom", message: "Invalid workout time" });
+      if (session.restTimer) {
+        const owner = session.exercises.find(
+          (e) => e.id === session.restTimer?.exerciseId,
+        );
+        if (
+          !session.restEndsAt ||
+          !owner ||
+          (session.restTimer.setId &&
+            !owner.sets.some(
+              (row) => row.id === session.restTimer?.setId && row.done,
+            ))
+        )
+          ctx.addIssue({ code: "custom", message: "Invalid rest timer owner" });
+      }
+      if (
+        session.currentExerciseId &&
+        !session.exercises.some((e) => e.id === session.currentExerciseId)
+      )
+        ctx.addIssue({ code: "custom", message: "Invalid selected exercise" });
       for (const exercise of session.exercises) {
         if (
           new Set(exercise.sets.map((s) => s.id)).size !== exercise.sets.length
@@ -390,6 +425,10 @@ export function startSession(template: Template, date: string): Session {
     status: "active",
     note: "",
     restEndsAt: null,
+    restTimer: null,
+    lastCompleted: null,
+    currentExerciseId: null,
+    soundEnabled: true,
     exercises: template.exercises.map((t) => ({
       id: uid(),
       exercise: structuredClone(t.exercise),

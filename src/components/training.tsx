@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   Archive,
   ArrowDown,
@@ -34,6 +34,15 @@ import {
   type Template,
   type TemplateExercise,
 } from "@/lib/model";
+import { RestPanel } from "./rest-panel";
+import { useRestAlerts } from "./rest-alerts";
+import {
+  beginRest,
+  completeSet,
+  endRest,
+  formalProgress,
+  undoSet,
+} from "@/lib/workout";
 import { goTo, useSection } from "@/lib/navigation";
 import { useStore } from "@/lib/store";
 import {
@@ -106,18 +115,46 @@ export function Training({ date }: { date: string }) {
   const [detail, setDetail] = useState<Session | null>(null);
   const [archive, setArchive] = useState<Template | null>(null);
   const active = state.sessions.find((s) => s.status === "active");
-  async function begin(t: Template) {
+  const alerts = useRestAlerts();
+  const [starting, setStarting] = useState<Template | null>(null);
+  const [uniformRest, setUniformRest] = useState(false);
+  const [startRest, setStartRest] = useState("90");
+  const [startingBusy, setStartingBusy] = useState(false);
+  const startLock = useRef(false);
+  function begin(t: Template) {
     if (active) {
       notify("请先完成当前训练");
       return;
     }
+    setUniformRest(false);
+    setStartRest(String(t.exercises[0].rest));
+    setStarting(t);
+  }
+  async function confirmStart(t: Template) {
+    if (active) {
+      notify("请先完成当前训练");
+      return;
+    }
+    if (startLock.current) return;
+    startLock.current = true;
+    setStartingBusy(true);
+    void alerts.enableSound();
     const ok = await mutate((s) => {
       if (s.sessions.some((x) => x.status === "active"))
         throw new Error("Workout already running");
-      s.sessions.push(startSession(t, date));
+      const session = startSession(t, date);
+      if (uniformRest)
+        session.exercises.forEach((e) => {
+          e.target.rest = Number(startRest);
+        });
+      session.currentExerciseId = session.exercises[0].id;
+      s.sessions.push(session);
       freezeTarget(s, date);
     });
+    startLock.current = false;
+    setStartingBusy(false);
     if (ok) {
+      setStarting(null);
       notify("训练已开始，每组自动保存");
       goTo("training/session");
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -372,6 +409,89 @@ export function Training({ date }: { date: string }) {
             )}
           </div>
         </>
+      )}
+      {starting && (
+        <Modal
+          title="开始本次训练"
+          description={`${starting.name} · ${starting.exercises.length} 个动作。每组从 0 开始记录。`}
+          onClose={() => {
+            if (!startingBusy) setStarting(null);
+          }}
+        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (
+                !uniformRest ||
+                (Number.isInteger(Number(startRest)) &&
+                  Number(startRest) >= 0 &&
+                  Number(startRest) <= 1800)
+              )
+                void confirmStart(starting);
+            }}
+          >
+            <Field label="休息时间设置">
+              <select
+                value={uniformRest ? "uniform" : "template"}
+                onChange={(e) => setUniformRest(e.target.value === "uniform")}
+              >
+                <option value="template">沿用各动作模板的间歇</option>
+                <option value="uniform">本次统一设置间歇</option>
+              </select>
+            </Field>
+            {!uniformRest && (
+              <p className="helper">
+                首个动作：{starting.exercises[0].exercise.name}，休息{" "}
+                {starting.exercises[0].rest} 秒。训练中可随时修改单个动作。
+              </p>
+            )}
+            <div className="rest-presets">
+              {[60, 90, 120, 180].map((value) => (
+                <Button
+                  key={value}
+                  type="button"
+                  variant="secondary"
+                  aria-pressed={uniformRest && Number(startRest) === value}
+                  onClick={() => {
+                    setUniformRest(true);
+                    setStartRest(String(value));
+                  }}
+                >
+                  {value} 秒
+                </Button>
+              ))}
+            </div>
+            {uniformRest && (
+              <Field label="本次组间休息秒数">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={1800}
+                  step={1}
+                  value={startRest}
+                  required
+                  onChange={(e) => setStartRest(e.target.value)}
+                />
+              </Field>
+            )}
+            <p className="helper">
+              完成一组后点击按钮，同时记组并开始休息。最后一个正式组默认不再计时。声音仅在网页前台可靠工作，请检查音量。
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => alerts.enableSound(true)}
+            >
+              试听提醒声音
+            </Button>
+            <div className="form-actions">
+              <Button className="full" type="submit" disabled={startingBusy}>
+                开始本次训练
+              </Button>
+            </div>
+          </form>
+        </Modal>
       )}
       {template && (
         <TemplateForm
@@ -781,25 +901,37 @@ function ScheduleForm({
   );
 }
 function Workout({ session }: { session: Session }) {
-  const [exerciseIndex, setExerciseIndex] = useState(() =>
-    Math.max(
-      0,
-      session.exercises.findIndex((e) => e.sets.some((set) => !set.done)),
-    ),
-  );
+  const alerts = useRestAlerts();
+  const now = alerts.now;
   const { state, mutate, notify, saving } = useStore();
   const [note, setNote] = useState(session.note);
-  const [now, setNow] = useState(Date.now());
+  const actionLock = useRef(false);
+  const lastAction = useRef(0);
+  const [actionCooling, setActionCooling] = useState(false);
+  const cooldown = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (cooldown.current) clearTimeout(cooldown.current);
+    },
+    [],
+  );
+  const exerciseIndex = Math.max(
+    0,
+    session.currentExerciseId
+      ? session.exercises.findIndex((e) => e.id === session.currentExerciseId)
+      : session.exercises.findIndex((e) => e.sets.some((set) => !set.done)),
+  );
+  function setExerciseIndex(index: number) {
+    void update((s) => {
+      s.currentExerciseId = s.exercises[index]?.id ?? null;
+    });
+  }
   const [finish, setFinish] = useState(false);
   const [discard, setDiscard] = useState(false);
   const [error, setError] = useState("");
   const [replace, setReplace] = useState<string | null>(null);
   const [replacement, setReplacement] = useState("");
   const [busy, setBusy] = useState(false);
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, []);
   const remaining = session.restEndsAt
     ? Math.max(0, Math.ceil((session.restEndsAt - now) / 1000))
     : 0;
@@ -820,6 +952,29 @@ function Workout({ session }: { session: Session }) {
         ?.sets.find((x) => x.id === setId);
       if (row) Object.assign(row, patch);
     });
+  }
+  async function record(exerciseId: string, setId: string, done: boolean) {
+    if (actionLock.current || Date.now() - lastAction.current < 600) return;
+    actionLock.current = true;
+    lastAction.current = Date.now();
+    setActionCooling(true);
+    cooldown.current = setTimeout(() => setActionCooling(false), 600);
+    try {
+      const item = session.exercises.find((e) => e.id === exerciseId);
+      const row = item?.sets.find((r) => r.id === setId);
+      if (done && (!item || !row || !validSet(row, item.exercise.mode))) {
+        setError("请先填写有效的重量、次数或秒数。");
+        return;
+      }
+      setError("");
+      if (done && session.soundEnabled) void alerts.enableSound();
+      await update((s) => {
+        if (done) completeSet(s, exerciseId, setId);
+        else undoSet(s, exerciseId, setId);
+      });
+    } finally {
+      actionLock.current = false;
+    }
   }
   const exercises = [
     ...catalogue,
@@ -843,31 +998,6 @@ function Workout({ session }: { session: Session }) {
           <small>分钟</small>
         </div>
       </div>
-      <div className="rest-timer" role="timer">
-        <span>
-          <Timer size={19} />
-          组间休息
-        </span>
-        <strong>
-          {session.restEndsAt
-            ? remaining > 0
-              ? `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}`
-              : "休息结束"
-            : "完成一组后开始"}
-        </strong>
-        {session.restEndsAt && (
-          <button
-            className="text-button"
-            onClick={() =>
-              update((s) => {
-                s.restEndsAt = null;
-              })
-            }
-          >
-            结束
-          </button>
-        )}
-      </div>
       <label className="exercise-switcher">
         <span>
           动作 {exerciseIndex + 1} / {session.exercises.length}
@@ -880,8 +1010,8 @@ function Workout({ session }: { session: Session }) {
         >
           {session.exercises.map((item, index) => (
             <option value={index} key={item.id}>
-              {index + 1}. {item.exercise.name} ·{" "}
-              {item.sets.filter((s) => s.done).length}/{item.sets.length} 组
+              {index + 1}. {item.exercise.name} · {formalProgress(item).done}/
+              {formalProgress(item).total} 正式组
             </option>
           ))}
         </select>
@@ -895,6 +1025,20 @@ function Workout({ session }: { session: Session }) {
           .sort((a, b) => b.startedAt - a.startedAt)
           .flatMap((s) => s.exercises)
           .find((e) => e.exercise.id === item.exercise.id);
+        const progress = formalProgress(item);
+        const pending = item.sets.find((row) => !row.done);
+        const pendingNumber = pending
+          ? item.sets
+              .filter((row) => row.warmup === pending.warmup)
+              .findIndex((row) => row.id === pending.id) + 1
+          : 0;
+        const willRest =
+          pending &&
+          item.target.rest > 0 &&
+          (pending.warmup
+            ? progress.done < progress.total ||
+              item.sets.some((row) => !row.done && row.id !== pending.id)
+            : progress.done + 1 < progress.total);
         return (
           <div className="workout-exercise" key={item.id}>
             <div className="exercise-head">
@@ -917,6 +1061,18 @@ function Workout({ session }: { session: Session }) {
                 </button>
               )}
             </div>
+            <div className="set-progress">
+              <span>正式组已完成</span>
+              <strong>
+                {progress.done}
+                <small> / {progress.total}</small>
+              </strong>
+              <span>
+                热身 {item.sets.filter((row) => row.warmup && row.done).length}{" "}
+                / {item.sets.filter((row) => row.warmup).length}
+              </span>
+            </div>
+            <RestPanel session={session} exerciseId={item.id} update={update} />
             {previous && (
               <p className="previous-record">
                 上次：
@@ -951,21 +1107,16 @@ function Workout({ session }: { session: Session }) {
                   className={`set-row ${set.done ? "done" : ""} ${item.exercise.mode === "timed" || item.exercise.mode === "bodyweight" ? "single" : ""}`}
                   key={set.id}
                 >
-                  <button
-                    className="set-index"
-                    title="点击切换热身组"
-                    aria-label={`第${n + 1}组${set.warmup ? "热身" : "正式"}，点击切换`}
-                    disabled={set.done}
-                    onClick={() =>
-                      updateSet(item.id, set.id, { warmup: !set.warmup })
-                    }
-                  >
-                    {set.warmup ? "热身" : n + 1}
-                  </button>
+                  <span className="set-index">
+                    {set.warmup
+                      ? "热身"
+                      : item.sets.slice(0, n + 1).filter((row) => !row.warmup)
+                          .length}
+                  </span>
                   {(item.exercise.mode === "weighted" ||
                     item.exercise.mode === "assisted") && (
                     <SetNumber
-                      label={`${item.exercise.name}第${n + 1}组重量`}
+                      label={`${item.exercise.name}${set.warmup ? "热身第" : "第"}${item.sets.slice(0, n + 1).filter((row) => row.warmup === set.warmup).length}组重量`}
                       min={0}
                       max={1000}
                       value={set.weight}
@@ -976,7 +1127,7 @@ function Workout({ session }: { session: Session }) {
                     />
                   )}
                   <SetNumber
-                    label={`${item.exercise.name}第${n + 1}组${item.exercise.mode === "timed" ? "秒数" : "次数"}`}
+                    label={`${item.exercise.name}${set.warmup ? "热身第" : "第"}${item.sets.slice(0, n + 1).filter((row) => row.warmup === set.warmup).length}组${item.exercise.mode === "timed" ? "秒数" : "次数"}`}
                     min={1}
                     max={item.exercise.mode === "timed" ? 36000 : 200}
                     integer
@@ -992,33 +1143,122 @@ function Workout({ session }: { session: Session }) {
                     }
                   />
                   <button
-                    aria-label={`${set.done ? "撤销" : "完成"}${item.exercise.name}第${n + 1}组`}
+                    aria-label={`${set.done ? "撤销" : "完成"}${item.exercise.name}${set.warmup ? "热身第" : "第"}${item.sets.slice(0, n + 1).filter((row) => row.warmup === set.warmup).length}组`}
                     className={`set-check ${set.done ? "checked" : ""}`}
-                    disabled={saving}
-                    onClick={async () => {
-                      if (!set.done && !validSet(set, item.exercise.mode)) {
-                        setError("请先填写有效的重量、次数或秒数。");
-                        return;
-                      }
-                      setError("");
-                      await update((s) => {
-                        const row = s.exercises
-                          .find((e) => e.id === item.id)
-                          ?.sets.find((x) => x.id === set.id);
-                        if (row) {
-                          row.done = !row.done;
-                          if (row.done && item.target.rest > 0)
-                            s.restEndsAt = Date.now() + item.target.rest * 1000;
-                        }
-                      });
+                    disabled={
+                      saving || actionCooling || (!set.done && remaining > 0)
+                    }
+                    onClick={(event) => {
+                      if (event.detail < 2)
+                        void record(item.id, set.id, !set.done);
                     }}
                   >
-                    <Check size={21} />
+                    {set.done ? <RotateCcw size={18} /> : <Check size={21} />}
                   </button>
                 </div>
               ))}
             </div>
+            <div className="complete-set-action">
+              {pending ? (
+                <Button
+                  className="full"
+                  disabled={saving || actionCooling || remaining > 0}
+                  onClick={(event) => {
+                    if (event.detail < 2)
+                      void record(item.id, pending.id, true);
+                  }}
+                >
+                  {remaining > 0
+                    ? "休息中，结束休息后继续"
+                    : `完成${pending.warmup ? "热身第" : "第"}${pendingNumber}组${willRest ? "并休息" : ""}`}
+                </Button>
+              ) : (
+                <p className="exercise-complete">
+                  该动作已完成
+                  {exerciseIndex < session.exercises.length - 1
+                    ? "，可以前往下一个动作"
+                    : "，可以结束并保存训练"}
+                </p>
+              )}
+              {!pending && exerciseIndex < session.exercises.length - 1 && (
+                <Button
+                  className="full"
+                  onClick={() => setExerciseIndex(exerciseIndex + 1)}
+                  disabled={saving}
+                >
+                  前往下一个动作
+                  <ChevronRight size={18} />
+                </Button>
+              )}
+              {progress.total > 0 &&
+                progress.done === progress.total &&
+                remaining === 0 && (
+                  <button
+                    className="text-button"
+                    disabled={saving || item.target.rest === 0}
+                    onClick={() => {
+                      if (session.soundEnabled) void alerts.enableSound();
+                      const token = session.restTimer?.id;
+                      void update((s) => {
+                        if (
+                          (s.restEndsAt ?? 0) > Date.now() ||
+                          s.restTimer?.id !== token
+                        )
+                          return;
+                        const current = s.exercises.find(
+                          (e) => e.id === item.id,
+                        )!;
+                        const owner =
+                          s.lastCompleted?.exerciseId === item.id
+                            ? s.lastCompleted.setId
+                            : (current.sets
+                                .filter((row) => row.done && !row.warmup)
+                                .at(-1)?.id ?? null);
+                        beginRest(
+                          s,
+                          item.id,
+                          owner,
+                          "exercise",
+                          current.target.rest,
+                          Date.now(),
+                        );
+                      });
+                    }}
+                  >
+                    开始动作间休息（{item.target.rest} 秒）
+                  </button>
+                )}
+            </div>
             <div className="set-tools">
+              <button
+                className="text-button"
+                disabled={saving || item.sets.length >= 50}
+                onClick={() =>
+                  update((s) => {
+                    const current = s.exercises.find((e) => e.id === item.id);
+                    if (current && current.sets.length < 50)
+                      current.sets.unshift({
+                        id: uid(),
+                        weight:
+                          item.exercise.mode === "bodyweight"
+                            ? null
+                            : item.target.weight,
+                        reps:
+                          item.exercise.mode === "timed"
+                            ? null
+                            : item.target.reps,
+                        seconds:
+                          item.exercise.mode === "timed"
+                            ? item.target.seconds
+                            : null,
+                        warmup: true,
+                        done: false,
+                      });
+                  })
+                }
+              >
+                ＋ 热身组
+              </button>
               <button
                 className="text-button"
                 disabled={item.sets.length >= 50}
@@ -1047,7 +1287,7 @@ function Workout({ session }: { session: Session }) {
                 }
               >
                 <Plus size={17} />
-                加一组
+                加正式组
               </button>
               {item.sets.length > 1 && !item.sets.at(-1)?.done && (
                 <button
@@ -1065,6 +1305,29 @@ function Workout({ session }: { session: Session }) {
           </div>
         );
       })}
+      {session.lastCompleted && (
+        <button
+          className="text-button undo-last"
+          disabled={saving || actionCooling}
+          onClick={() => {
+            if (session.lastCompleted)
+              void record(
+                session.lastCompleted.exerciseId,
+                session.lastCompleted.setId,
+                false,
+              );
+          }}
+        >
+          <RotateCcw size={17} />
+          撤销刚才一组（
+          {
+            session.exercises.find(
+              (e) => e.id === session.lastCompleted?.exerciseId,
+            )?.exercise.name
+          }
+          ）
+        </button>
+      )}
       <div className="exercise-navigation">
         <Button
           variant="secondary"
@@ -1125,7 +1388,8 @@ function Workout({ session }: { session: Session }) {
             const ok = await update((s) => {
               s.status = "completed";
               s.endedAt = Date.now();
-              s.restEndsAt = null;
+              endRest(s);
+              s.lastCompleted = null;
             });
             setBusy(false);
             if (ok) {

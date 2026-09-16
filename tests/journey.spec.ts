@@ -52,6 +52,7 @@ test("mobile journal: real inputs, history, interruption and backup recovery", a
   await page.getByLabel("重量 · kg", { exact: true }).fill("60");
   await page.getByRole("button", { name: "保存训练模板" }).click();
   await page.getByRole("button", { name: "开始训练", exact: true }).click();
+  await page.getByRole("button", { name: "开始本次训练", exact: true }).click();
   const firstWeight = page.getByLabel("杠铃卧推第1组重量");
   await firstWeight.fill("");
   await firstWeight.pressSequentially("100", { delay: 1 });
@@ -60,6 +61,7 @@ test("mobile journal: real inputs, history, interruption and backup recovery", a
   await page
     .getByRole("button", { name: "完成杠铃卧推第1组", exact: true })
     .click();
+  await page.getByRole("button", { name: "结束休息", exact: true }).click();
   await page.getByLabel("杠铃卧推第2组次数").fill("8");
   await page
     .getByRole("button", { name: "完成杠铃卧推第2组", exact: true })
@@ -73,7 +75,7 @@ test("mobile journal: real inputs, history, interruption and backup recovery", a
     page.getByRole("button", { name: "撤销杠铃卧推第2组" }),
   ).toBeVisible();
   await expect(page.getByLabel("杠铃卧推第2组次数")).toHaveValue("8");
-  await expect(page.locator(".rest-timer")).toContainText("组间休息");
+  await expect(page.locator(".rest-timer")).toContainText("放松");
   await page.getByRole("button", { name: "结束并保存训练" }).click();
   await page.getByRole("button", { name: "确认", exact: true }).click();
   await expect(page.locator(".active-workout")).toHaveCount(0);

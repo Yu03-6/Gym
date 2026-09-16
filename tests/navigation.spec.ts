@@ -80,6 +80,7 @@ test("workouts show one exercise and retain sets across navigation", async ({
   }
   await page.getByRole("button", { name: "保存训练模板" }).click();
   await page.getByRole("button", { name: "开始训练", exact: true }).click();
+  await page.getByRole("button", { name: "开始本次训练", exact: true }).click();
   await expect(page).toHaveURL(/#training\/session$/);
   await expect(page.getByRole("heading", { name: "我的训练模板" })).toHaveCount(
     0,
@@ -97,6 +98,8 @@ test("workouts show one exercise and retain sets across navigation", async ({
   await expect(page.getByLabel("杠铃卧推第1组次数")).toHaveCount(0);
   await page.getByRole("link", { name: "返回训练" }).click();
   await page.getByRole("link", { name: /训练进行中/ }).click();
+  await expect(page.getByLabel("当前动作")).toHaveValue("1");
+  await page.getByLabel("当前动作").selectOption("0");
   await expect(
     page.getByRole("button", { name: "撤销杠铃卧推第1组" }),
   ).toBeVisible();

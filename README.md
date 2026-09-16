@@ -15,6 +15,16 @@ A mobile-first nutrition and strength-training journal. Built with Next.js, Reac
 
 There is no recipe generator, weekly menu, or shopping list. Influencer-specific plans are not invented or preloaded; source material must be reviewed before entering rules.
 
+## Workout sessions
+
+Start at zero completed formal sets. Completing a set records it once and starts the configured rest; expiry never records another set. Warmups have a separate count. The last formal set skips automatic rest, with optional exercise-to-exercise rest before moving on.
+
+Add 30 seconds or end rest without changing records. Undo cancels only the timer owned by the undone set. The timer identifies its exercise, survives navigation and reload using an absolute deadline, and is accessible from other sections. Rest duration can be configured at session start or per exercise without changing the template.
+
+Sound requires a user gesture; use the audition control after reopening the page. A visible page can play the expiry tones, including while viewing another FitGo section. Optional screen wake lock depends on browser support. iPhone lock-screen or background alarms are not guaranteed. A late return shows the elapsed state without replaying an old alarm. Older backups remain readable with defaults for the new timer fields.
+
+Automated tests cover transactional set completion, precise undo, separate warmups, timer recovery, and once-only Web Audio tone scheduling. These checks do not verify physical speaker output or iPhone hardware behavior.
+
 ## Development
 
 Use Node.js 22+ and pnpm 11.19.0.

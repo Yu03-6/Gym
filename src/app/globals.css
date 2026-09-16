@@ -3284,3 +3284,192 @@ textarea:hover:not(:disabled) {
     animation: none;
   }
 }
+/* Workout completion and rest form one explicit, persisted flow. */
+.rest-shortcut {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: #e6eddb;
+  color: #354c2d;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-top: 14px;
+  font-size: 13px;
+  min-height: 44px;
+}
+.rest-shortcut > svg:last-child {
+  margin-left: auto;
+}
+.set-progress {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 14px 0 10px;
+}
+.set-progress > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.set-progress > span:last-child {
+  margin-left: auto;
+}
+.set-progress strong {
+  font-size: 30px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.set-progress small {
+  font-size: 18px;
+  color: var(--muted);
+}
+.rest-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+}
+.rest-setting > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: #57664f;
+}
+.rest-console {
+  padding: 16px;
+  margin: 8px 0 12px;
+  border-radius: 18px;
+  background: #eaf0df;
+  border: 1px solid #dce5ce;
+}
+.rest-owner {
+  font-size: 12px;
+  color: #4c6042;
+  line-height: 1.6;
+}
+.rest-console .rest-timer {
+  padding: 12px 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  color: #294431;
+}
+.rest-console .rest-timer strong {
+  font-size: 40px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+}
+.rest-console .rest-timer span {
+  font-size: 12px;
+  margin-left: auto;
+}
+.rest-console.finished {
+  background: #f0f3e9;
+}
+.rest-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.rest-controls .button {
+  min-height: 46px;
+  padding: 10px;
+  font-size: 14px;
+}
+.rest-options {
+  margin: 4px 0 16px;
+}
+.rest-options summary {
+  font-size: 12px;
+  font-weight: 500;
+  color: #5b684f;
+}
+.rest-preferences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.rest-preferences .helper {
+  flex-basis: 100%;
+}
+.wake-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  width: 100%;
+  font-size: 14px;
+}
+.wake-toggle input {
+  width: 20px;
+  min-height: 20px;
+  height: 20px;
+  accent-color: #294431;
+}
+.rest-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 14px 0 20px;
+}
+.rest-presets .button {
+  padding: 9px 4px;
+  font-size: 13px;
+}
+.rest-presets .button[aria-pressed="true"] {
+  background: #294431;
+  color: white;
+  border-color: #294431;
+}
+.complete-set-action {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+.complete-set-action > .button {
+  min-height: 54px;
+}
+.exercise-complete {
+  border-radius: 12px;
+  background: #edf3e5;
+  color: #375532;
+  padding: 14px;
+  font-size: 14px;
+}
+.undo-last {
+  font-size: 12px;
+  max-width: 100%;
+  text-align: left;
+}
+.active-workout .set-tools {
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+.active-workout .set-index {
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .rest-console .rest-timer strong {
+    font-size: 36px;
+  }
+  .rest-console .rest-timer > svg {
+    width: 18px;
+  }
+  .set-progress {
+    gap: 8px;
+  }
+  .rest-presets {
+    gap: 6px;
+  }
+  .rest-preferences .button {
+    font-size: 13px;
+    padding: 9px 12px;
+  }
+}

@@ -32,6 +32,8 @@ import { ProfileForm } from "./profile-form";
 import { Nutrition } from "./nutrition";
 import { Training } from "./training";
 import { Trends } from "./trends";
+import { RestShortcut } from "./rest-panel";
+import { RestAlertsProvider } from "./rest-alerts";
 import { SettingsPanel } from "./settings";
 type Tab = "today" | "nutrition" | "training" | "trends";
 const tabs = [
@@ -45,7 +47,9 @@ export function GymApp() {
   useEffect(() => setMounted(true), []);
   return mounted ? (
     <StoreProvider>
-      <App />
+      <RestAlertsProvider>
+        <App />
+      </RestAlertsProvider>
     </StoreProvider>
   ) : (
     <main className="loading" role="status">
@@ -177,6 +181,7 @@ function App() {
             </button>
           </div>
         </header>
+        <RestShortcut />
         {updateWorker && (
           <div className="offline">
             新版已准备好，已保存的记录会保留。
