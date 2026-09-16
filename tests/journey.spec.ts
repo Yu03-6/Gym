@@ -63,6 +63,10 @@ test("mobile journal: real inputs, history, interruption and backup recovery", a
   await page
     .getByRole("button", { name: "完成杠铃卧推第2组", exact: true })
     .click();
+  // The completion state is rendered only after the IndexedDB transaction commits.
+  await expect(
+    page.getByRole("button", { name: "撤销杠铃卧推第2组" }),
+  ).toBeVisible();
   await page.reload();
   await expect(
     page.getByRole("button", { name: "撤销杠铃卧推第2组" }),

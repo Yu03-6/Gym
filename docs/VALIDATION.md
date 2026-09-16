@@ -14,3 +14,7 @@ Validated on 2026-09-16.
 Verified influencer protocols require source material. Custom phased targets and source notes are available now; no influencer rules are invented. Automatic progressive overload, adaptive TDEE calibration, and target repetition ranges are not implemented. All records are local to the browser; cloud synchronization is intentionally excluded from this version.
 
 GitHub Pages serves application files only. JSON exports are the recovery mechanism; users should save backups outside the browser regularly.
+
+## Published-site checks
+
+GitHub Actions successfully tested, built, and deployed https://yu03-6.github.io/Gym/. Chromium checks against that production URL passed for the full journal/backup journey, responsive layouts, nutrition phases, and offline reload with further local edits. The reload test waits for the committed completion indicator before navigation; clicking a control alone does not establish that an asynchronous IndexedDB write has finished. The clean mobile landing page returned HTTP 200 with no page errors.
