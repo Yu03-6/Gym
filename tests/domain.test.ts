@@ -182,7 +182,12 @@ describe("nutrition and history invariants", () => {
     s.sessions.push(startSession(template, "2026-09-16"));
     s.sessions[0].restEndsAt = Date.now() + 90000;
     s.foods.push(food);
-    expect(parseBackup(serializeBackup(s))).toEqual(s);
+    const exported = serializeBackup(s);
+    expect(JSON.parse(exported).app).toBe("FitGo");
+    expect(parseBackup(exported)).toEqual(s);
+    const legacy = JSON.parse(exported);
+    legacy.app = "Gym";
+    expect(parseBackup(JSON.stringify(legacy))).toEqual(s);
   });
   it("rejects duplicate IDs, invalid dates, missing template references and unknown versions", () => {
     const s = initialState();

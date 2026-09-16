@@ -121,7 +121,7 @@ export function SettingsPanel({
   async function backup() {
     try {
       setBusy(true);
-      download(serializeBackup(await snapshot()), `gym-backup-${today()}.json`);
+      download(serializeBackup(await snapshot()), `fitgo-backup-${today()}.json`);
       await mutate((s) => {
         s.lastBackup = Date.now();
       });
@@ -243,7 +243,7 @@ export function SettingsPanel({
             try {
               download(
                 csv(await snapshot()),
-                `gym-records-${today()}.csv`,
+                `fitgo-records-${today()}.csv`,
                 "text/csv;charset=utf-8",
               );
               notify("CSV 已开始下载，仅供分析，不用于恢复");
@@ -327,7 +327,7 @@ export function SettingsPanel({
           <ArrowUpRight size={16} />
         </a>
       </section>
-      <p className="version">GYM JOURNAL · 1.0.0 · LOCAL FIRST</p>
+      <p className="version">FitGo · 1.0.0 · LOCAL FIRST</p>
       {pending && (
         <Confirm
           title="用备份替换当前记录？"
@@ -341,7 +341,7 @@ export function SettingsPanel({
             const ok = await mutate((s) => {
               download(
                 serializeBackup(s),
-                `gym-before-restore-${Date.now()}.json`,
+                `fitgo-before-restore-${Date.now()}.json`,
               );
               const revision = s.revision;
               Object.assign(s, structuredClone(replacement));

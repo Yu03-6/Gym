@@ -1,4 +1,4 @@
-# Gym design system
+# FitGo design system
 
 ## Direction
 
@@ -18,10 +18,23 @@ The fitness search supplied the athletic Barlow type direction and orange/green 
 - No data at first launch. Useful empty states lead into real creation flows.
 - Body metrics and targets are separate. Immutable snapshots protect previous records.
 - Desktop uses a sidebar and two-column layout; mobile is the primary acceptance target.
-- Dialogs use native modal focus handling, scrolling, and Escape support.
+- Dialogs use Radix Primitives for focus containment, Escape dismissal, scroll locking, accessible names, and nested layers. Keyboard focus returns to the previous active control.
 - Charts expose readable underlying values and never use color as the only label.
 - Respect reduced motion; preserve browser zoom and bottom safe areas.
 
 ## Product exclusions
 
 No recipe generation, weekly meal plans, shopping lists, social feed, paid subscription, or invented influencer protocols.
+
+
+## FitGo refresh
+
+The taste-skill redesign-preserve protocol was applied to the existing product: retain the four destinations, source data, orange actions, warm neutral surface, and olive feedback. Existing large empty cards, repeated decorative eyebrows, and equal visual weighting were reduced. DESIGN_VARIANCE 4, MOTION_INTENSITY 2, VISUAL_DENSITY 5. Landing-page-specific recipes were not applied to this working journal.
+
+- A dark olive energy card prioritizes the daily energy balance. Secondary nutrition and training surfaces remain light.
+- Manrope variable Latin text and numbers come from the official Fontsource package and are self-hosted through next/font/local. Chinese text retains the platform font stack. Only the Latin WOFF2 subset is bundled; no external font requests are required.
+- Official @radix-ui/react-dialog provides behavior while project CSS defines the mobile sheet and desktop modal appearance. Existing Lucide icons are retained.
+- Cards use 18–20 px corners, controls 10–12 px corners, and round progress rings. Motion is restrained and respects reduced-motion settings.
+- The public name, metadata, installation manifest, and new export filenames use FitGo. Existing IndexedDB identifiers, URL, and service-worker cache family remain stable. Both Gym and FitGo backup envelopes can be restored.
+
+Radix Primitives and Fontsource are package dependencies, not standalone installed SKILL.md files. The taste-skill source is the locally available design-taste-frontend skill.

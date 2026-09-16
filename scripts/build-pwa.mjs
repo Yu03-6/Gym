@@ -3,8 +3,8 @@ import path from "node:path";
 const base = process.env.NEXT_PUBLIC_BASE_PATH || "";
 const out = path.resolve("out");
 const manifest = {
-  name: "Gym · 饮食与训练日志",
-  short_name: "Gym",
+  name: "FitGo · 饮食与训练日志",
+  short_name: "FitGo",
   description: "手机端饮食与训练记录",
   lang: "zh-CN",
   start_url: `${base}/`,

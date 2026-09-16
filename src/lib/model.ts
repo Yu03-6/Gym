@@ -427,16 +427,16 @@ export function initialState(): AppState {
 }
 export function parseBackup(raw: string): AppState {
   if (raw.length > 20_000_000)
-    throw new Error("文件过大，请选择 20 MB 以内的 Gym 备份。");
+    throw new Error("文件过大，请选择 20 MB 以内的 FitGo 备份。");
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch {
-    throw new Error("无法读取 JSON 文件，请选择完整的 Gym 备份。");
+    throw new Error("无法读取 JSON 文件，请选择完整的 FitGo 备份。");
   }
   const result = z
     .object({
-      app: z.literal("Gym"),
+      app: z.enum(["Gym", "FitGo"]),
       version: z.literal(1),
       exportedAt: z.string(),
       data: stateSchema,
@@ -448,7 +448,7 @@ export function parseBackup(raw: string): AppState {
 }
 export function serializeBackup(s: AppState) {
   const raw = JSON.stringify(
-    { app: "Gym", version: 1, exportedAt: new Date().toISOString(), data: s },
+    { app: "FitGo", version: 1, exportedAt: new Date().toISOString(), data: s },
     null,
     2,
   );

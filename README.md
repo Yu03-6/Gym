@@ -1,4 +1,4 @@
-# Gym Journal
+# FitGo
 
 A mobile-first nutrition and strength-training journal. Built with Next.js, React, TypeScript, Zod, and IndexedDB. All personal records remain in the current browser. No analytics, account, or application backend is required.
 

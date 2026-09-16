@@ -2,7 +2,7 @@
   --bg: #f6f5f1;
   --surface: #fff;
   --ink: #202821;
-  --muted: #697068;
+  --muted: #5f685f;
   --border: #e5e7df;
   --accent: #c94418;
   --accent-bright: #ef5b2a;
@@ -13,7 +13,7 @@
   --carbs: #bd471e;
   --fat: #9c721c;
   --danger: #b02f29;
-  --radius: 20px;
+  --radius: 18px;
   --shadow: 0 12px 40px #232d2210;
 }
 * {
@@ -28,7 +28,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family:
-    var(--font-barlow),
+    var(--font-manrope),
     -apple-system,
     BlinkMacSystemFont,
     "PingFang SC",
@@ -361,7 +361,7 @@ details[open] {
   font-weight: 600;
 }
 .app-shell {
-  max-width: 1700px;
+  max-width: 1440px;
   margin: 0 auto;
 }
 .sidebar {
@@ -369,7 +369,7 @@ details[open] {
   top: 0;
   bottom: 0;
   width: 225px;
-  background: #eeeee7;
+  background: #f0f1eb;
   border-right: 1px solid var(--border);
   padding: 40px 25px;
   display: flex;
@@ -379,9 +379,9 @@ details[open] {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 40px;
+  font-size: 34px;
   line-height: 1;
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: -1.5px;
 }
 .brand > svg {
@@ -445,7 +445,7 @@ details[open] {
   max-width: 1330px;
 }
 .topbar {
-  min-height: 94px;
+  min-height: 82px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -584,7 +584,7 @@ details[open] {
 }
 .hero-number {
   display: block;
-  font-size: 64px;
+  font-size: 60px;
   line-height: 1.3;
   font-weight: 600;
   letter-spacing: -2px;
@@ -855,12 +855,15 @@ details[open] {
 }
 .modal {
   position: fixed;
-  inset: 0;
+  z-index: 51;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: calc(100% - 32px);
   max-width: 560px;
   max-height: min(90dvh, 880px);
   border: 1px solid var(--border);
-  border-radius: 23px;
+  border-radius: 20px;
   padding: 0;
   background: var(--surface);
   color: var(--ink);
@@ -871,9 +874,12 @@ details[open] {
 .modal.wide {
   max-width: 690px;
 }
-.modal::backdrop {
-  background: #18201870;
-  backdrop-filter: blur(3px);
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #18201880;
+  backdrop-filter: blur(4px);
 }
 .modal-head {
   position: sticky;
@@ -1714,11 +1720,10 @@ details[open] {
   color: var(--muted);
 }
 .view-enter {
-  animation: appear 0.22s ease-out;
+  animation: appear 0.18s ease-out;
 }
 @keyframes appear {
   from {
-    opacity: 0.5;
     transform: translateY(4px);
   }
   to {
@@ -1833,7 +1838,7 @@ details[open] {
   }
   .mobile-brand b {
     font-size: 26px;
-    font-weight: 900;
+    font-weight: 800;
     letter-spacing: -1px;
   }
   .bottom-nav {
@@ -1903,12 +1908,12 @@ details[open] {
     padding-right: 20px;
   }
   .topbar {
-    min-height: 70px;
+    min-height: 64px;
   }
   .page-heading {
     align-items: flex-start;
     gap: 10px;
-    margin: 24px 0 19px;
+    margin: 20px 0 16px;
   }
   .page-heading h1 {
     font-size: 27px;
@@ -1940,7 +1945,7 @@ details[open] {
     margin-bottom: 21px;
   }
   .week-day {
-    min-height: 73px;
+    min-height: 64px;
     border-radius: 12px;
   }
   .week-day b {
@@ -1966,7 +1971,7 @@ details[open] {
     padding: 0 2px;
   }
   .hero-number {
-    font-size: 60px;
+    font-size: 52px;
   }
   .energy-ring {
     width: 110px;
@@ -1999,10 +2004,10 @@ details[open] {
     padding: 13px 21px;
   }
   .macro-bars {
-    gap: 21px;
+    gap: 16px;
   }
   .nutrients-card .helper {
-    margin: 22px 0 0;
+    margin: 16px 0 0;
   }
   .setup-callout {
     padding: 19px;
@@ -2056,7 +2061,7 @@ details[open] {
     margin-top: 25px;
   }
   .empty {
-    padding: 23px 5px;
+    padding: 12px 5px;
   }
   .empty h3 {
     font-size: 16px;
@@ -2071,9 +2076,11 @@ details[open] {
     max-height: 93dvh;
     width: 100%;
     max-width: 100%;
-    margin: auto 0 0;
+    margin: 0;
     bottom: 0;
     top: auto;
+    left: 0;
+    transform: none;
     border-radius: 22px 22px 0 0;
     border-bottom: 0;
   }
@@ -2436,5 +2443,203 @@ details[open] {
   }
   .stat p {
     font-size: 13px;
+  }
+}
+
+/* FitGo: hierarchy comes from the primary metric, not uniform card decoration. */
+.energy-card {
+  --surface: #253c30;
+  --muted: #c6d2c8;
+  --border: #ffffff26;
+  background: var(--surface);
+  color: #f9fcf8;
+  border-color: var(--surface);
+}
+.energy-card .pill {
+  background: #ffffff12;
+  color: #e5efde;
+}
+.energy-card .card-label svg,
+.energy-card .energy-ring svg {
+  color: #e1eca1;
+}
+.energy-card .energy-ring {
+  background: conic-gradient(#dce99c var(--progress), #ffffff1f 0);
+}
+.energy-card .card-link {
+  color: #edf5d0;
+  background: #ffffff08;
+}
+.energy-card .card-link:hover {
+  background: #ffffff16;
+}
+.energy-card .hero-number {
+  font-weight: 650;
+  letter-spacing: -2.4px;
+}
+.setup-callout {
+  background: #eef1e7;
+  border-color: #dfe5d5;
+}
+.setup-callout .eyebrow {
+  color: #586b48;
+}
+.setup-callout p:not(.eyebrow) {
+  color: #53634c;
+}
+.setup-art {
+  background: #dfe7d1;
+  color: #415a37;
+}
+.brand-dot {
+  color: var(--accent);
+}
+.brand,
+.mobile-brand b {
+  letter-spacing: -1.8px;
+}
+.brand > svg,
+.mobile-brand > svg {
+  display: none;
+}
+.section-head .eyebrow {
+  letter-spacing: 1px;
+}
+.card-label {
+  margin-bottom: 20px;
+}
+.hero-number,
+.stat strong,
+.set-row input {
+  font-variant-numeric: tabular-nums;
+}
+input:hover:not(:disabled),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: #83927c;
+}
+.button:active:not(:disabled),
+.icon-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.modal-head .icon-button {
+  background: #f0f2ec;
+}
+.modal-head {
+  background: var(--surface);
+  backdrop-filter: none;
+}
+.modal:focus {
+  outline: none;
+}
+@media (max-width: 820px) {
+  .bottom-nav {
+    background: #fbfcf8;
+    padding-top: 6px;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom));
+  }
+  .bottom-nav > a {
+    min-height: 52px;
+    flex: 1;
+    max-width: 110px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .bottom-nav > a.active {
+    background: #e8eedf;
+    color: #294431;
+  }
+  .bottom-nav > a:not(.active) {
+    color: #68705f;
+  }
+}
+@media (max-width: 600px) {
+  .main {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .page-heading h1 span {
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  .page-heading .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.4px;
+    margin-bottom: 5px;
+  }
+  .date-picker input {
+    font-size: 16px;
+    width: 154px;
+  }
+  .card {
+    padding: 20px;
+    border-radius: 18px;
+  }
+  .energy-card {
+    padding-bottom: 0;
+  }
+  .energy-card .card-link {
+    width: calc(100% + 40px);
+    margin-left: -20px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .energy-breakdown {
+    margin: 20px 0;
+    gap: 8px;
+  }
+  .energy-breakdown b {
+    font-size: 20px;
+  }
+  .energy-breakdown > div + div {
+    padding-left: 12px;
+  }
+  .setup-callout {
+    padding: 16px;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .setup-art,
+  .setup-callout .eyebrow {
+    display: none;
+  }
+  .setup-callout h2 {
+    font-size: 16px;
+  }
+  .setup-callout p:not(.eyebrow) {
+    font-size: 12px;
+    margin-top: 5px;
+  }
+  .setup-callout .button {
+    grid-column: 1 / -1;
+    min-height: 44px;
+    margin-top: 2px;
+  }
+  .lower .empty {
+    align-items: flex-start;
+    text-align: left;
+    padding: 0;
+  }
+  .lower .empty-icon {
+    display: none;
+  }
+  .lower .empty p {
+    margin: 6px 0 14px;
+  }
+  .lower .empty .button {
+    width: 100%;
+  }
+  .section-head {
+    gap: 8px;
+  }
+  .section-head h2 {
+    font-size: 18px;
+  }
+  .modal-overlay {
+    backdrop-filter: blur(2px);
+  }
+  .modal-head {
+    padding-top: 18px;
   }
 }

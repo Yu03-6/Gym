@@ -107,10 +107,10 @@ function App() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <a href="#today" className="brand" aria-label="Gym 首页">
+        <a href="#today" className="brand" aria-label="FitGo 首页">
           <Dumbbell size={25} />
           <span>
-            GYM<span className="brand-dot">.</span>
+            Fit<span className="brand-dot">Go</span>
           </span>
         </a>
         <p className="sidebar-caption">YOUR DAILY PRACTICE</p>
@@ -140,7 +140,9 @@ function App() {
         <header className="topbar">
           <div className="mobile-brand">
             <Dumbbell size={20} />
-            <b>GYM.</b>
+            <b>
+              Fit<span className="brand-dot">Go</span>
+            </b>
           </div>
           <div className="desktop-label">饮食 / 训练 / 身体变化</div>
           <div className="top-actions">
@@ -276,7 +278,7 @@ function App() {
           </>
         )}
         <footer className="page-footer">
-          GYM JOURNAL<span>不赶进度，保持记录。</span>
+          FitGo<span>不赶进度，保持记录。</span>
         </footer>
       </main>
       <nav className="bottom-nav" aria-label="手机主导航">
@@ -443,7 +445,6 @@ function Today({
       <div className="dashboard-grid lower">
         <section>
           <SectionHead
-            eyebrow="TRAINING"
             title="今天的训练"
             action="查看训练"
             onAction={() => navigate("training")}
@@ -517,7 +518,6 @@ function Today({
         </section>
         <section>
           <SectionHead
-            eyebrow="YOUR PLAN"
             title="饮食阶段"
             action="管理阶段"
             onAction={() => navigate("nutrition")}

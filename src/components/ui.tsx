@@ -1,11 +1,6 @@
 "use client";
-import {
-  useEffect,
-  useRef,
-  useId,
-  type ReactNode,
-  type ButtonHTMLAttributes,
-} from "react";
+import { useRef, type ReactNode, type ButtonHTMLAttributes } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
 import { X, Plus, ArrowUpRight } from "lucide-react";
 import { useStore } from "@/lib/store";
 export function Button({
@@ -36,60 +31,59 @@ export function Modal({
   wide?: boolean;
 }) {
   const { error } = useStore();
-  const ref = useRef<HTMLDialogElement>(null);
-  const heading = useId();
-  useEffect(() => {
-    const d = ref.current;
-    d?.showModal();
-    const before = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = before;
-      d?.close();
-    };
-  }, []);
+  const returnFocus = useRef<HTMLElement | null>(
+    typeof document !== "undefined"
+      ? (document.activeElement as HTMLElement)
+      : null,
+  );
   return (
-    <dialog
-      ref={ref}
-      className={`modal ${wide ? "wide" : ""}`}
-      aria-labelledby={heading}
-      onCancel={(e) => {
-        e.preventDefault();
-        onClose();
-      }}
-      onClick={(e) => {
-        if (e.target === ref.current) {
-          const r = ref.current.getBoundingClientRect();
-          if (
-            e.clientX < r.left ||
-            e.clientX > r.right ||
-            e.clientY < r.top ||
-            e.clientY > r.bottom
-          )
-            onClose();
-        }
+    <Dialog.Root
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
       }}
     >
-      <div className="modal-head">
-        <div>
-          <h2 id={heading}>{title}</h2>
-          {description && <p>{description}</p>}
-        </div>
-        <button className="icon-button" onClick={onClose} aria-label="关闭">
-          <X size={22} />
-        </button>
-      </div>
-      <div className="modal-body">
-        {error && (
-          <p role="alert" className="form-error">
-            {error}
-          </p>
-        )}
-        {children}
-      </div>
-    </dialog>
+      <Dialog.Portal>
+        <Dialog.Overlay className="modal-overlay" />
+        <Dialog.Content
+          className={`modal ${wide ? "wide" : ""}`}
+          {...(!description ? { "aria-describedby": undefined } : {})}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            if (returnFocus.current?.isConnected) returnFocus.current.focus();
+          }}
+        >
+          <div className="modal-head">
+            <div>
+              <Dialog.Title asChild>
+                <h2>{title}</h2>
+              </Dialog.Title>
+              {description && (
+                <Dialog.Description asChild>
+                  <p>{description}</p>
+                </Dialog.Description>
+              )}
+            </div>
+            <Dialog.Close asChild>
+              <button className="icon-button" aria-label="关闭">
+                <X size={22} />
+              </button>
+            </Dialog.Close>
+          </div>
+          <div className="modal-body">
+            {error && (
+              <p role="alert" className="form-error">
+                {error}
+              </p>
+            )}
+            {children}
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
+
 export function Field({
   label,
   hint,
