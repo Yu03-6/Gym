@@ -1,21 +1,54 @@
+/* Semantic palette shared by every page and both system color schemes. */
 :root {
-  --bg: #f6f5f1;
-  --surface: #fff;
-  --ink: #202821;
-  --muted: #5f685f;
-  --border: #e5e7df;
-  --accent: #c94418;
-  --accent-bright: #ef5b2a;
-  --accent-soft: #fff0e7;
-  --green: #39734c;
-  --green-soft: #eaf1e8;
-  --protein: #42664b;
-  --carbs: #bd471e;
-  --fat: #9c721c;
-  --danger: #b02f29;
-  --radius: 18px;
-  --shadow: 0 12px 40px #232d2210;
+  color-scheme: light;
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-subtle: #eef0f3;
+  --ink: #20252b;
+  --muted: #606975;
+  --border: #dfe3e8;
+  --border-strong: #9ba5b1;
+  --accent: #b8401d;
+  --accent-bright: #b8401d;
+  --accent-soft: #fff0e9;
+  --on-accent: #ffffff;
+  --green: #24734e;
+  --green-soft: #e8f4ed;
+  --protein: #24734e;
+  --carbs: #b8401d;
+  --fat: #856317;
+  --danger: #b73434;
+  --danger-soft: #fceced;
+  --radius: 20px;
+  --shadow: 0 8px 28px rgb(32 37 43 / 5%);
+  --overlay: rgb(16 21 28 / 45%);
 }
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #15171a;
+    --surface: #1f2328;
+    --surface-subtle: #282d34;
+    --ink: #f0f3f6;
+    --muted: #adb7c3;
+    --border: #383f48;
+    --border-strong: #748191;
+    --accent: #ff9b78;
+    --accent-bright: #ff9b78;
+    --accent-soft: #3d2a24;
+    --on-accent: #201b18;
+    --green: #86d6ab;
+    --green-soft: #23392e;
+    --protein: #86d6ab;
+    --carbs: #ff9b78;
+    --fat: #e1c170;
+    --danger: #ff9e9e;
+    --danger-soft: #40272b;
+    --shadow: 0 8px 28px rgb(0 0 0 / 12%);
+    --overlay: rgb(0 0 0 / 65%);
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -84,7 +117,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 summary:focus-visible {
-  outline: 3px solid #de6b2f;
+  outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
 button:active:not(:disabled) {
@@ -135,7 +168,7 @@ select,
 textarea {
   width: 100%;
   min-height: 48px;
-  border: 1px solid #bfc5b9;
+  border: 1px solid var(--border-strong);
   border-radius: 10px;
   padding: 10px 12px;
   background: var(--surface);
@@ -146,8 +179,8 @@ textarea {
   resize: vertical;
 }
 input:disabled {
-  background: #edf2e9;
-  color: #344938;
+  background: var(--surface-subtle);
+  color: var(--green);
   opacity: 1;
 }
 input[type="number"] {
@@ -155,7 +188,7 @@ input[type="number"] {
 }
 input::placeholder,
 textarea::placeholder {
-  color: #7a8078;
+  color: var(--muted);
 }
 select {
   padding-right: 26px;
@@ -210,7 +243,7 @@ details[open] {
 }
 .body-copy {
   line-height: 1.8;
-  color: #50594e;
+  color: var(--muted);
 }
 .button {
   border: 1px solid transparent;
@@ -226,24 +259,24 @@ details[open] {
 }
 .button.primary {
   background: var(--accent);
-  color: white;
+  color: var(--on-accent);
 }
 .button.primary:hover {
-  background: #b93b13;
+  background: var(--accent);
 }
 .button.secondary {
-  background: #fff;
-  border-color: #d9ded2;
+  background: var(--surface);
+  border-color: var(--border);
 }
 .button.secondary:hover {
-  background: #f1f4ec;
+  background: var(--surface-subtle);
 }
 .button.ghost {
   background: transparent;
 }
 .button.danger {
   background: var(--danger);
-  color: #fff;
+  color: var(--on-accent);
 }
 .icon-button {
   width: 44px;
@@ -257,7 +290,7 @@ details[open] {
   border-radius: 10px;
 }
 .icon-button:hover {
-  background: #edf0e8;
+  background: var(--surface-subtle);
 }
 .text-button {
   border: 0;
@@ -276,7 +309,7 @@ details[open] {
   font-size: 12px;
   border-radius: 6px;
   padding: 4px 9px;
-  background: #f0f2eb;
+  background: var(--surface-subtle);
   white-space: nowrap;
   font-weight: 500;
 }
@@ -285,12 +318,12 @@ details[open] {
   color: var(--accent);
 }
 .note {
-  background: #eef2e9;
+  background: var(--surface-subtle);
   border-radius: 12px;
   display: flex;
   gap: 10px;
   padding: 14px;
-  color: #465540;
+  color: var(--ink);
   font-size: 14px;
   line-height: 1.7;
   margin: 16px 0;
@@ -300,9 +333,9 @@ details[open] {
 }
 .form-error,
 .error-banner {
-  background: #fcece9;
-  color: #9b2a21;
-  border: 1px solid #ebc2ba;
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid var(--danger-soft);
   border-radius: 10px;
   padding: 12px 16px;
   font-size: 14px;
@@ -369,7 +402,7 @@ details[open] {
   top: 0;
   bottom: 0;
   width: 225px;
-  background: #f0f1eb;
+  background: var(--surface-subtle);
   border-right: 1px solid var(--border);
   padding: 40px 25px;
   display: flex;
@@ -414,10 +447,10 @@ details[open] {
 }
 .sidebar nav a.active {
   background: var(--ink);
-  color: white;
+  color: var(--on-accent);
 }
 .sidebar nav a:hover:not(.active) {
-  background: #e1e5da;
+  background: var(--border);
 }
 .nav-arrow {
   margin-left: auto;
@@ -425,7 +458,7 @@ details[open] {
 }
 .active .nav-arrow {
   opacity: 1;
-  color: #e7f0a5;
+  color: var(--accent);
 }
 .sidebar-foot {
   margin-top: auto;
@@ -437,7 +470,7 @@ details[open] {
 }
 .sidebar-foot b {
   font-size: 13px;
-  color: #46503f;
+  color: var(--ink);
 }
 .main {
   margin-left: 225px;
@@ -492,7 +525,7 @@ details[open] {
   background: transparent;
   font-size: 13px;
   padding: 8px;
-  color: #5d6759;
+  color: var(--muted);
 }
 .week-strip {
   display: flex;
@@ -534,17 +567,17 @@ details[open] {
 }
 .week-day.selected {
   background: var(--ink);
-  color: #fff;
+  color: var(--surface);
 }
 .week-day.selected > span {
-  color: #d1d7ca;
+  color: var(--border);
 }
 .week-day.selected .has-data {
-  background: #e3ec96;
+  background: var(--accent);
 }
 .week-day.is-today:not(.selected) {
-  border-color: #cbd3c1;
-  background: #f0f2e9;
+  border-color: var(--border);
+  background: var(--surface-subtle);
 }
 .week-arrow {
   background: transparent;
@@ -556,7 +589,7 @@ details[open] {
   color: var(--muted);
 }
 .week-arrow:hover {
-  background: #ecefe5;
+  background: var(--border);
 }
 .bottom-nav {
   display: none;
@@ -601,7 +634,10 @@ details[open] {
   width: 112px;
   height: 112px;
   border-radius: 50%;
-  background: conic-gradient(var(--accent-bright) var(--progress), #f0ede5 0);
+  background: conic-gradient(
+    var(--accent-bright) var(--progress),
+    var(--border) 0
+  );
   padding: 8px;
   transform: rotate(-90deg);
   flex-shrink: 0;
@@ -661,7 +697,7 @@ details[open] {
   border-top: 1px solid var(--border);
   color: var(--accent);
   font-weight: 600;
-  background: #fffaf6;
+  background: var(--accent-soft);
   font-size: 14px;
   min-height: 50px;
 }
@@ -708,7 +744,7 @@ details[open] {
 }
 .bar {
   height: 6px;
-  background: #f0f1eb;
+  background: var(--surface-subtle);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -724,14 +760,14 @@ details[open] {
   display: flex;
   align-items: center;
   gap: 20px;
-  border: 1px solid #e5d0bb;
-  background: #fbefe1;
+  border: 1px solid var(--border);
+  background: var(--accent-soft);
   border-radius: var(--radius);
   padding: 24px;
   margin-bottom: 22px;
 }
 .setup-callout .eyebrow {
-  color: #946337;
+  color: var(--accent);
   font-size: 11px;
 }
 .setup-callout h2 {
@@ -740,20 +776,20 @@ details[open] {
 .setup-callout p:not(.eyebrow) {
   font-size: 14px;
   margin-top: 6px;
-  color: #785e48;
+  color: var(--muted);
 }
 .setup-callout .button {
   margin-left: auto;
   white-space: nowrap;
 }
 .setup-art {
-  background: #f3d9bf;
+  background: var(--accent-soft);
   width: 60px;
   height: 66px;
   border-radius: 16px;
   display: grid;
   place-items: center;
-  color: #a04a23;
+  color: var(--accent);
 }
 .setup-art svg {
   transform: rotate(-12deg);
@@ -766,8 +802,8 @@ details[open] {
   align-items: center;
 }
 .empty-icon {
-  background: #f0f3ec;
-  color: #748063;
+  background: var(--surface-subtle);
+  color: var(--muted);
   width: 59px;
   height: 59px;
   display: grid;
@@ -818,14 +854,14 @@ details[open] {
   line-height: 1.8;
 }
 .local-note svg {
-  color: #7b8869;
+  color: var(--muted);
   margin-top: 2px;
 }
 .workout-highlight {
   padding: 24px;
   background: var(--ink);
   border-radius: var(--radius);
-  color: white;
+  color: var(--on-accent);
 }
 .workout-highlight h3 {
   font-size: 25px;
@@ -833,14 +869,14 @@ details[open] {
 }
 .workout-highlight p {
   font-size: 14px;
-  color: #c3ccbc;
+  color: var(--border-strong);
   margin-bottom: 20px;
 }
 .page-footer {
   margin-top: 48px;
   padding-top: 22px;
   border-top: 1px solid var(--border);
-  color: #7b8076;
+  color: var(--muted);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 1.4px;
@@ -867,7 +903,7 @@ details[open] {
   padding: 0;
   background: var(--surface);
   color: var(--ink);
-  box-shadow: 0 25px 100px #0003;
+  box-shadow: 0 25px 100px var(--overlay);
   overflow: auto;
   overscroll-behavior: contain;
 }
@@ -878,7 +914,7 @@ details[open] {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: #18201880;
+  background: var(--overlay);
   backdrop-filter: blur(4px);
 }
 .modal-head {
@@ -890,7 +926,7 @@ details[open] {
   justify-content: space-between;
   gap: 12px;
   padding: 23px 24px 18px;
-  background: #fffffff5;
+  background: var(--surface);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
 }
@@ -916,7 +952,7 @@ details[open] {
 .field > span {
   font-size: 14px;
   font-weight: 500;
-  color: #404a3d;
+  color: var(--ink);
 }
 .field small {
   font-size: 12px;
@@ -1001,7 +1037,7 @@ details[open] {
   padding: 13px 20px;
   border-radius: 12px;
   background: var(--ink);
-  color: #fff;
+  color: var(--surface);
   box-shadow: var(--shadow);
   display: flex;
   align-items: center;
@@ -1010,12 +1046,12 @@ details[open] {
   width: max-content;
 }
 .toast svg {
-  color: #d3e1af;
+  color: var(--green-soft);
 }
 .segmented {
   display: flex;
   gap: 4px;
-  background: #eaece4;
+  background: var(--border);
   padding: 5px;
   border-radius: 12px;
   margin: 5px 0 25px;
@@ -1034,9 +1070,9 @@ details[open] {
 }
 .segmented button[aria-selected="true"],
 .segmented button[aria-pressed="true"] {
-  background: white;
+  background: var(--surface);
   color: var(--ink);
-  box-shadow: 0 2px 6px #2630210a;
+  box-shadow: var(--shadow);
 }
 .segmented.compact {
   margin: 0;
@@ -1129,8 +1165,8 @@ details[open] {
   display: flex;
   align-items: center;
   gap: 9px;
-  background: white;
-  border: 1px solid #cbd1c1;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 11px;
   padding: 0 14px;
   margin-bottom: 17px;
@@ -1179,8 +1215,8 @@ details[open] {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: #f3f1e9;
-  color: #817357;
+  background: var(--surface-subtle);
+  color: var(--muted);
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -1203,7 +1239,7 @@ details[open] {
   padding: 12px 15px;
   border: 0;
   border-bottom: 1px solid var(--border);
-  background: white;
+  background: var(--surface);
   display: flex;
   justify-content: space-between;
   gap: 8px;
@@ -1216,7 +1252,7 @@ details[open] {
 }
 .food-picker button.selected {
   background: var(--green-soft);
-  color: #294c33;
+  color: var(--green);
 }
 .food-picker small {
   display: block;
@@ -1260,7 +1296,7 @@ details[open] {
 .template-number {
   font-size: 30px;
   font-weight: 500;
-  color: #818d6c;
+  color: var(--muted);
 }
 .template-card .card-label {
   margin-bottom: 8px;
@@ -1279,11 +1315,11 @@ details[open] {
   gap: 6px;
 }
 .exercise-tags span {
-  background: #f2f4ed;
+  background: var(--surface-subtle);
   padding: 4px 9px;
   border-radius: 5px;
   font-size: 12px;
-  color: #526046;
+  color: var(--muted);
 }
 .template-card .form-actions .button {
   flex: 1;
@@ -1319,7 +1355,7 @@ details[open] {
   margin: 0;
 }
 .exercise-builder {
-  background: #fafbf7;
+  background: var(--surface-subtle);
 }
 .exercise-builder .helper {
   margin: 0 0 12px;
@@ -1335,13 +1371,13 @@ details[open] {
 .sticky-form-action {
   position: sticky;
   bottom: -26px;
-  background: #fffffff5;
+  background: var(--surface);
   padding: 15px 0 2px;
   backdrop-filter: blur(6px);
 }
 .active-workout {
-  background: #fff;
-  border: 1px solid #bdcbb0;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   padding: 28px;
   margin-bottom: 30px;
@@ -1404,8 +1440,8 @@ details[open] {
 }
 .previous-record {
   font-size: 12px;
-  color: #5b6c4b;
-  background: #f4f6ee;
+  color: var(--muted);
+  background: var(--surface-subtle);
   border-radius: 7px;
   padding: 9px 12px;
   margin: 12px 0;
@@ -1433,7 +1469,7 @@ details[open] {
 }
 .set-index {
   border: 0;
-  background: #f0f2eb;
+  background: var(--surface-subtle);
   border-radius: 9px;
   width: 44px;
   height: 48px;
@@ -1456,13 +1492,13 @@ details[open] {
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background: #f1f3ec;
-  border: 1px solid #c8cebf;
-  color: #6e7865;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border);
+  color: var(--muted);
 }
 .set-check.checked {
   background: var(--green);
-  color: white;
+  color: var(--on-accent);
   border-color: var(--green);
 }
 .set-tools {
@@ -1576,10 +1612,10 @@ details[open] {
   background: var(--accent);
 }
 .goal {
-  background: #e5e9dc;
+  background: var(--border);
 }
 .chart-legend .goal {
-  border: 1px solid #8b957c;
+  border: 1px solid var(--muted);
 }
 .intake-chart {
   display: grid;
@@ -1617,7 +1653,7 @@ details[open] {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #f2f4ec;
+  background: var(--surface-subtle);
   border: 0;
   border-radius: 13px;
   text-align: left;
@@ -1821,10 +1857,10 @@ details[open] {
     bottom: 0;
     left: 0;
     right: 0;
-    background: #fcfcf9f5;
+    background: var(--surface);
     backdrop-filter: blur(15px);
     z-index: 10;
-    border-top: 1px solid #dfe4d6;
+    border-top: 1px solid var(--border);
     padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
     justify-content: space-around;
   }
@@ -1836,13 +1872,13 @@ details[open] {
     gap: 4px;
     min-width: 70px;
     min-height: 54px;
-    color: #717869;
+    color: var(--muted);
     border-radius: 11px;
     font-size: 11px;
   }
   .bottom-nav > a.active {
     color: var(--accent);
-    background: #faeee4;
+    background: var(--accent-soft);
   }
   .bottom-nav > a.active svg {
     stroke-width: 2.3;
@@ -1899,7 +1935,7 @@ details[open] {
     font-weight: 400;
     letter-spacing: -0.4px;
     margin-top: 3px;
-    color: #57614f;
+    color: var(--muted);
   }
   .page-heading .eyebrow {
     font-size: 10px;
@@ -2408,49 +2444,19 @@ details[open] {
 }
 
 /* FitGo: hierarchy comes from the primary metric, not uniform card decoration. */
-.energy-card {
-  --surface: #253c30;
-  --muted: #c6d2c8;
-  --border: #ffffff26;
-  background: var(--surface);
-  color: #f9fcf8;
-  border-color: var(--surface);
-}
-.energy-card .pill {
-  background: #ffffff12;
-  color: #e5efde;
-}
-.energy-card .card-label svg,
-.energy-card .energy-ring svg {
-  color: #e1eca1;
-}
-.energy-card .energy-ring {
-  background: conic-gradient(#dce99c var(--progress), #ffffff1f 0);
-}
-.energy-card .card-link {
-  color: #edf5d0;
-  background: #ffffff08;
-}
-.energy-card .card-link:hover {
-  background: #ffffff16;
-}
-.energy-card .hero-number {
-  font-weight: 650;
-  letter-spacing: -2.4px;
-}
 .setup-callout {
-  background: #eef1e7;
-  border-color: #dfe5d5;
+  background: var(--surface-subtle);
+  border-color: var(--border);
 }
 .setup-callout .eyebrow {
-  color: #586b48;
+  color: var(--muted);
 }
 .setup-callout p:not(.eyebrow) {
-  color: #53634c;
+  color: var(--muted);
 }
 .setup-art {
-  background: #dfe7d1;
-  color: #415a37;
+  background: var(--surface-subtle);
+  color: var(--green);
 }
 .brand-dot {
   color: var(--accent);
@@ -2477,14 +2483,14 @@ details[open] {
 input:hover:not(:disabled),
 select:hover:not(:disabled),
 textarea:hover:not(:disabled) {
-  border-color: #83927c;
+  border-color: var(--muted);
 }
 .button:active:not(:disabled),
 .icon-button:active:not(:disabled) {
   transform: scale(0.98);
 }
 .modal-head .icon-button {
-  background: #f0f2ec;
+  background: var(--surface-subtle);
 }
 .modal-head {
   background: var(--surface);
@@ -2495,7 +2501,7 @@ textarea:hover:not(:disabled) {
 }
 @media (max-width: 820px) {
   .bottom-nav {
-    background: #fbfcf8;
+    background: var(--surface-subtle);
     padding-top: 6px;
     padding-bottom: calc(6px + env(safe-area-inset-bottom));
   }
@@ -2507,11 +2513,11 @@ textarea:hover:not(:disabled) {
     font-weight: 600;
   }
   .bottom-nav > a.active {
-    background: #e8eedf;
-    color: #294431;
+    background: var(--surface-subtle);
+    color: var(--green);
   }
   .bottom-nav > a:not(.active) {
-    color: #68705f;
+    color: var(--muted);
   }
 }
 @media (max-width: 600px) {
@@ -2645,7 +2651,7 @@ textarea:hover:not(:disabled) {
   border-color: var(--border);
 }
 .date-tools .icon-button {
-  color: #56634e;
+  color: var(--muted);
 }
 .today-view {
   display: grid;
@@ -2667,7 +2673,7 @@ textarea:hover:not(:disabled) {
 }
 .overview-macros {
   padding-top: 22px;
-  border-top: 1px solid #ffffff24;
+  border-top: 1px solid var(--border);
 }
 .overview-macros .macro-bars {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2677,7 +2683,7 @@ textarea:hover:not(:disabled) {
   display: block;
 }
 .overview-macros .macro span {
-  color: #dce5d8;
+  color: var(--muted);
   font-size: 12px;
   margin-bottom: 6px;
 }
@@ -2688,16 +2694,16 @@ textarea:hover:not(:disabled) {
 }
 .overview-macros .macro small {
   font-size: 11px;
-  color: #c6d2c8;
+  color: var(--muted);
 }
 .overview-macros .macro span i {
   display: none;
 }
 .overview-macros .macro i {
-  background: #dce99c;
+  background: var(--accent);
 }
 .overview-macros .bar {
-  background: #ffffff20;
+  background: var(--border);
   height: 4px;
 }
 .quick-actions {
@@ -2707,7 +2713,7 @@ textarea:hover:not(:disabled) {
 }
 .quick-actions > button {
   border: 1px solid var(--border);
-  background: #fff;
+  background: var(--surface);
   border-radius: 18px;
   display: flex;
   align-items: center;
@@ -2721,7 +2727,7 @@ textarea:hover:not(:disabled) {
 .feature-list a > svg:last-child,
 .resume-training > svg {
   margin-left: auto;
-  color: #74806c;
+  color: var(--muted);
 }
 .quick-actions b,
 .training-summary b,
@@ -2747,13 +2753,13 @@ textarea:hover:not(:disabled) {
   width: 46px;
   height: 46px;
   border-radius: 14px;
-  background: #f1f4e9;
-  color: #4d6439;
+  background: var(--surface-subtle);
+  color: var(--green);
   flex-shrink: 0;
 }
 .quick-actions > button:first-child .quick-icon {
-  color: #b63b16;
-  background: #fff0e6;
+  color: var(--accent);
+  background: var(--accent-soft);
 }
 .today-training .section-head {
   margin-top: 0;
@@ -2769,7 +2775,7 @@ textarea:hover:not(:disabled) {
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 20px;
-  background: white;
+  background: var(--surface);
 }
 .management-shortcuts {
   display: flex;
@@ -2782,13 +2788,13 @@ textarea:hover:not(:disabled) {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid #dfe4d6;
-  background: #edf1e6;
+  border: 1px solid var(--border);
+  background: var(--surface-subtle);
   padding: 10px 14px;
   border-radius: 12px;
   min-height: 46px;
   font-size: 14px;
-  color: #41523a;
+  color: var(--green);
 }
 .nutrition-top .card > .section-head {
   margin-bottom: 10px;
@@ -2797,7 +2803,7 @@ textarea:hover:not(:disabled) {
   margin-top: 4px;
 }
 .nutrition-details summary {
-  color: #4f6045;
+  color: var(--muted);
   font-weight: 500;
 }
 .nutrition-details .macro-bars {
@@ -2828,23 +2834,23 @@ textarea:hover:not(:disabled) {
 .training-intro {
   padding: 28px;
   border-radius: 22px;
-  background: #eaf0df;
-  border: 1px solid #dce5cd;
+  background: var(--green-soft);
+  border: 1px solid var(--border);
 }
 .training-intro > svg {
-  color: #405b36;
+  color: var(--green);
   margin-bottom: 16px;
 }
 .training-intro h2 {
   font-size: 25px;
 }
 .training-intro p {
-  color: #5d6e50;
+  color: var(--muted);
   font-size: 14px;
   margin: 8px 0 20px;
 }
 .training-intro .button {
-  background: #294431;
+  background: var(--green);
 }
 .feature-list {
   margin-top: 24px;
@@ -2858,10 +2864,10 @@ textarea:hover:not(:disabled) {
   border-bottom: 1px solid var(--border);
 }
 .feature-list a > svg:first-child {
-  color: #5e7350;
+  color: var(--muted);
 }
 .resume-training {
-  background: #eef2e6;
+  background: var(--surface-subtle);
 }
 .resume-training b {
   margin: 3px 0;
@@ -2871,22 +2877,22 @@ textarea:hover:not(:disabled) {
   padding: 4px;
   gap: 4px;
   border-radius: 14px;
-  background: #e9ede2;
+  background: var(--surface-subtle);
 }
 .screen-tabs a {
   flex: 1;
   padding: 11px 8px;
   min-height: 44px;
   text-align: center;
-  color: #5b6852;
+  color: var(--muted);
   font-size: 14px;
   font-weight: 600;
   border-radius: 10px;
 }
 .screen-tabs a[aria-current="page"] {
-  background: white;
-  color: #294431;
-  box-shadow: 0 2px 6px #293c3010;
+  background: var(--surface);
+  color: var(--green);
+  box-shadow: var(--shadow);
 }
 .trends-view .stat-grid {
   grid-template-columns: 1fr;
@@ -3022,10 +3028,10 @@ textarea:hover:not(:disabled) {
     grid-template-columns: 1fr 1fr;
     gap: 8px;
     padding: 8px;
-    background: #fcfcf8;
-    border: 1px solid #e3e6db;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
     border-radius: 16px;
-    box-shadow: 0 8px 30px #243b301c;
+    box-shadow: var(--shadow);
   }
   .nutrition-top .diet-actions .button {
     font-size: 13px;
@@ -3156,8 +3162,8 @@ textarea:hover:not(:disabled) {
   justify-content: space-between;
   gap: 16px;
   width: 100%;
-  background: #eff3e8;
-  border: 1px solid #e0e6d6;
+  background: var(--green-soft);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 14px 16px;
   text-align: left;
@@ -3176,7 +3182,7 @@ textarea:hover:not(:disabled) {
 .calendar-toggle {
   border: 0;
   background: transparent;
-  color: #5b6a50;
+  color: var(--muted);
   min-height: 44px;
   padding: 8px 0 8px 8px;
   display: flex;
@@ -3250,8 +3256,8 @@ textarea:hover:not(:disabled) {
   display: flex;
   gap: 10px;
   align-items: center;
-  background: #e6eddb;
-  color: #354c2d;
+  background: var(--green-soft);
+  color: var(--green);
   border-radius: 12px;
   padding: 10px 14px;
   margin-top: 14px;
@@ -3295,7 +3301,7 @@ textarea:hover:not(:disabled) {
   align-items: center;
   gap: 7px;
   font-size: 13px;
-  color: #57664f;
+  color: var(--muted);
 }
 /* Persistent workout dial; the outer stroke represents remaining time. */
 .rest-console {
@@ -3358,7 +3364,7 @@ textarea:hover:not(:disabled) {
 .dial-button.stop,
 .dial-button.expired {
   color: var(--danger);
-  background: #fbeceb;
+  background: var(--danger-soft);
 }
 .dial-button strong {
   font-size: 44px;
@@ -3423,7 +3429,7 @@ textarea:hover:not(:disabled) {
 .rest-options summary {
   font-size: 12px;
   font-weight: 500;
-  color: #5b684f;
+  color: var(--muted);
 }
 .rest-preferences {
   display: flex;
@@ -3445,7 +3451,7 @@ textarea:hover:not(:disabled) {
   width: 20px;
   min-height: 20px;
   height: 20px;
-  accent-color: #294431;
+  accent-color: var(--green);
 }
 .rest-presets {
   display: grid;
@@ -3458,9 +3464,9 @@ textarea:hover:not(:disabled) {
   font-size: 13px;
 }
 .rest-presets .button[aria-pressed="true"] {
-  background: #294431;
-  color: white;
-  border-color: #294431;
+  background: var(--green);
+  color: var(--on-accent);
+  border-color: var(--green);
 }
 .complete-set-action {
   display: grid;
@@ -3472,8 +3478,8 @@ textarea:hover:not(:disabled) {
 }
 .exercise-complete {
   border-radius: 12px;
-  background: #edf3e5;
-  color: #375532;
+  background: var(--green-soft);
+  color: var(--green);
   padding: 14px;
   font-size: 14px;
 }
@@ -3537,4 +3543,451 @@ textarea:hover:not(:disabled) {
 }
 .workout-mode .exercise-head {
   margin: 16px 0 8px;
+}
+
+/* FitGo visual refresh: quiet surfaces, one brand accent, functional status colors. */
+.card,
+.active-workout,
+.template-card,
+.training-intro {
+  border-color: var(--border);
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: none;
+}
+.sidebar {
+  background: var(--surface);
+}
+.sidebar nav a.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.active .nav-arrow {
+  color: currentColor;
+}
+.button.primary,
+.training-intro .button {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.button.primary:hover,
+.training-intro .button:hover {
+  background: var(--accent);
+  filter: brightness(0.94);
+}
+.button.secondary {
+  border-color: var(--border);
+  background: var(--surface);
+}
+.button.secondary:hover {
+  background: var(--surface-subtle);
+}
+input,
+select,
+textarea {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--border-strong);
+  border-radius: 10px;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+select {
+  min-height: 48px;
+}
+.date-tools input {
+  background: var(--surface);
+  border-color: var(--border);
+}
+.section-head {
+  margin-top: 28px;
+  margin-bottom: 14px;
+}
+.section-head h2 {
+  font-size: 19px;
+  letter-spacing: -0.3px;
+}
+.page-heading h1 {
+  font-weight: 750;
+  letter-spacing: -0.8px;
+}
+.eyebrow {
+  letter-spacing: 0.7px;
+}
+.pill {
+  background: var(--surface-subtle);
+  color: var(--muted);
+  border-radius: 8px;
+}
+.today-view {
+  gap: 20px 28px;
+}
+.today-view .energy-card {
+  padding: 24px;
+  border-radius: var(--radius);
+}
+.energy-card .card-label {
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+.energy-card .hero-number {
+  color: var(--accent);
+  font-size: clamp(46px, 7vw, 64px);
+  font-weight: 650;
+}
+.energy-card .energy-ring {
+  width: 90px;
+  height: 90px;
+  padding: 5px;
+}
+.energy-card .energy-ring svg {
+  width: 20px;
+  height: 20px;
+}
+.energy-breakdown {
+  margin: 24px 0;
+}
+.energy-breakdown b {
+  font-size: 20px;
+}
+.overview-macros {
+  border-color: var(--border);
+  padding-top: 18px;
+}
+.overview-macros .macro span,
+.overview-macros .macro small {
+  color: var(--muted);
+}
+.overview-macros .macro b {
+  color: var(--ink);
+}
+.overview-macros .macro i {
+  background: var(--accent);
+}
+.overview-macros .bar {
+  background: var(--surface-subtle);
+}
+.setup-callout {
+  background: var(--surface);
+  border-color: var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+}
+.setup-callout p:not(.eyebrow) {
+  color: var(--muted);
+}
+.setup-callout .setup-art {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.quick-actions {
+  gap: 12px;
+}
+.quick-actions > button {
+  border: 0;
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 18px;
+}
+.quick-icon,
+.summary-icon,
+.quick-actions > button:first-child .quick-icon {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 12px;
+}
+.training-summary {
+  border: 0;
+  border-radius: 14px;
+  padding: 18px;
+}
+.training-intro {
+  border: 0;
+  padding: 28px;
+  position: relative;
+}
+.training-intro > svg {
+  color: var(--accent);
+}
+.training-intro h2 {
+  font-size: 26px;
+  letter-spacing: -0.6px;
+}
+.training-intro .button {
+  min-width: 160px;
+}
+.training-plan > .list-card {
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+.training-plan .rest-day {
+  padding: 8px 0;
+  margin: 0;
+}
+.feature-list {
+  border-top: 0;
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 0 18px;
+}
+.feature-list a {
+  padding: 20px 0;
+}
+.feature-list a:last-child {
+  border-bottom: 0;
+}
+.feature-list a > svg:first-child {
+  color: var(--accent);
+}
+.resume-training {
+  background: var(--accent-soft);
+  border-color: transparent;
+}
+.management-shortcuts {
+  justify-content: flex-start;
+  margin: 24px 0 0;
+  gap: 20px;
+}
+.management-shortcuts a {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 8px 0;
+  color: var(--muted);
+}
+.management-shortcuts a > svg:last-child {
+  width: 14px;
+}
+.meal-grid {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  padding: 0 20px;
+}
+.meal-grid .meal-card {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 22px 0;
+}
+.meal-grid .meal-card + .meal-card {
+  border-top: 1px solid var(--border);
+}
+.meal-card .card-label {
+  margin-bottom: 8px;
+}
+.meal-card .card-label > span > svg {
+  color: var(--muted);
+}
+.meal-card .card-label b {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.meal-card .card-label small {
+  font-size: 12px;
+}
+.food-row {
+  padding: 10px 0;
+}
+.nutrition-top .card {
+  border: 0;
+}
+.nutrition-top .number {
+  font-size: 38px;
+  letter-spacing: -1px;
+  color: var(--accent);
+}
+.nutrition-top .section-head h2 small {
+  font-size: 14px;
+  color: var(--muted);
+}
+.screen-tabs {
+  background: var(--surface-subtle);
+  border-radius: 12px;
+  padding: 4px;
+}
+.screen-tabs a {
+  color: var(--muted);
+}
+.screen-tabs a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--surface);
+  box-shadow: none;
+}
+.trends-view .stat-grid {
+  gap: 0;
+  border-radius: 18px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.trends-view .stat {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.trends-view .stat + .stat {
+  border-top: 1px solid var(--border);
+}
+.trends-view .stat strong {
+  font-size: 32px;
+  letter-spacing: -0.7px;
+}
+.workout-mode .active-workout {
+  background: transparent;
+  border: 0;
+  padding: 4px 0 20px;
+}
+.workout-mode .workout-header {
+  padding: 0 4px;
+}
+.workout-mode .exercise-switcher select {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  min-height: 48px;
+}
+.workout-mode .workout-exercise {
+  border-top: 0;
+}
+.workout-mode .set-progress {
+  padding: 8px 4px;
+}
+.workout-mode .rest-setting {
+  padding: 0 4px;
+  border-color: var(--border);
+}
+.workout-mode .rest-options {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+.workout-mode .set-table {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 6px 12px;
+}
+.workout-mode .set-row input {
+  border-color: var(--border);
+  background: var(--surface-subtle);
+}
+.workout-mode .set-row.done input {
+  background: var(--green-soft);
+  color: var(--green);
+}
+.dial-track {
+  stroke: var(--border);
+}
+.dial-button {
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  color: var(--green);
+}
+.dial-button.stop,
+.dial-button.expired {
+  background: var(--danger-soft);
+}
+.dial-caption {
+  color: var(--muted);
+  font-size: 13px;
+}
+.modal-head,
+.modal,
+.sticky-form-action {
+  background: var(--surface);
+}
+.week-day.selected {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.week-day.selected > span {
+  color: var(--accent);
+}
+@media (max-width: 820px) {
+  .main {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom));
+  }
+  .bottom-nav {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: none;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    gap: 8px;
+  }
+  .bottom-nav > a {
+    border-radius: 12px;
+    gap: 4px;
+  }
+  .bottom-nav > a.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .bottom-nav > a:not(.active) {
+    color: var(--muted);
+  }
+  .bottom-nav > a svg {
+    width: 21px;
+    height: 21px;
+  }
+  .topbar {
+    background: var(--bg);
+    border-bottom: 0;
+  }
+  .page-heading {
+    margin: 12px 0 22px;
+  }
+  .today-view .energy-card {
+    padding: 22px;
+  }
+  .today-view .setup-callout {
+    margin-bottom: 16px;
+  }
+  .today-view .energy-breakdown {
+    margin: 22px 0;
+  }
+  .quick-actions > button {
+    padding: 14px;
+    gap: 10px;
+    display: flex;
+  }
+  .quick-actions > button > svg {
+    display: none;
+  }
+  .quick-actions b {
+    font-size: 14px;
+  }
+  .quick-actions small {
+    display: none;
+  }
+  .quick-icon {
+    width: 36px;
+    height: 40px;
+    background: transparent;
+  }
+  .today-training {
+    margin-top: 24px;
+  }
+  .nutrition-top .diet-actions {
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  .management-shortcuts {
+    padding-bottom: 8px;
+  }
+  .workout-mode .page-heading {
+    margin: 4px 0 14px;
+  }
+  .training-intro {
+    padding: 24px;
+  }
+  .training-intro .button {
+    width: 100%;
+  }
+  .meal-grid .meal-card {
+    padding: 20px 0;
+  }
 }

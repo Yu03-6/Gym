@@ -118,20 +118,6 @@ export function Nutrition({
   return (
     <div className="view-enter">
       {diary && (
-        <nav className="management-shortcuts" aria-label="饮食管理">
-          <a href="#nutrition/foods">
-            <Utensils size={18} />
-            我的食物
-            <ArrowUpRight size={16} />
-          </a>
-          <a href="#nutrition/phases">
-            <Leaf size={18} />
-            阶段计划
-            <ArrowUpRight size={16} />
-          </a>
-        </nav>
-      )}
-      {diary && (
         <>
           <div className="nutrition-top">
             <section className="card">
@@ -253,6 +239,20 @@ export function Nutrition({
             })}
           </div>
         </>
+      )}
+      {diary && (
+        <nav className="management-shortcuts" aria-label="饮食管理">
+          <a href="#nutrition/foods">
+            <Utensils size={18} />
+            我的食物
+            <ArrowUpRight size={16} />
+          </a>
+          <a href="#nutrition/phases">
+            <Leaf size={18} />
+            阶段计划
+            <ArrowUpRight size={16} />
+          </a>
+        </nav>
       )}
       {section === "foods" && (
         <>

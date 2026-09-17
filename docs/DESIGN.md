@@ -2,7 +2,7 @@
 
 ## Direction
 
-Mobile-first personal nutrition and strength journal. A warm, quiet working surface with athletic typography, dark olive text, orange primary actions, and botanical green training feedback. No stock photographs, generated meals, decorative charts, or demonstration records.
+Mobile-first personal nutrition and strength journal. A quiet neutral working surface with athletic typography, orange primary actions, and green/red training feedback. Light and dark palettes follow the system preference. No stock photographs, generated meals, decorative charts, or demonstration records.
 
 ## Skill inputs
 
@@ -14,7 +14,7 @@ The fitness search supplied the athletic Barlow type direction and orange/green 
 
 - Four bottom tabs: Today, Nutrition, Training, Trends. Settings is secondary.
 - At least 44 CSS px for principal controls, 48 px form controls, 16 px inputs.
-- Warm white surfaces, subtle borders, 4/8 px spacing rhythm, restrained 150–220 ms feedback.
+- Neutral surfaces, subtle borders, 4/8 px spacing rhythm, restrained 150–220 ms feedback.
 - No data at first launch. Useful empty states lead into real creation flows.
 - Body metrics and targets are separate. Immutable snapshots protect previous records.
 - Desktop uses a sidebar and two-column layout; mobile is the primary acceptance target.
@@ -26,8 +26,7 @@ The fitness search supplied the athletic Barlow type direction and orange/green 
 
 No recipe generation, weekly meal plans, shopping lists, social feed, paid subscription, or invented influencer protocols.
 
-
-## FitGo refresh
+## Earlier FitGo refresh (superseded by the September 17 palette below)
 
 The taste-skill redesign-preserve protocol was applied to the existing product: retain the four destinations, source data, orange actions, warm neutral surface, and olive feedback. Existing large empty cards, repeated decorative eyebrows, and equal visual weighting were reduced. DESIGN_VARIANCE 4, MOTION_INTENSITY 2, VISUAL_DENSITY 5. Landing-page-specific recipes were not applied to this working journal.
 
@@ -48,3 +47,11 @@ The dashboard contains a combined energy/macro overview, direct food/weight crea
 - Trends switches between body, nutrition, and strength. Additional activity estimates are nested under nutrition trends.
 - Hash routes allow direct links, reload recovery, and browser Back without a server router. Existing primary hashes and IndexedDB identifiers remain valid. Route changes restore the page heading focus without stealing focus from an open dialog.
 - Mobile intake actions stay above bottom navigation; compact landscape layouts return them to normal flow. Principal controls retain 44 px touch targets. No sample records are inserted into user storage.
+
+## September 17 palette and structure refresh
+
+Design read: preserve FitGo as a mobile personal training tool, using quieter neutral surfaces and its established orange identity. DESIGN_VARIANCE 4, MOTION_INTENSITY 2, VISUAL_DENSITY 5. Applied taste-skill's redesign audit, spacing, color consistency, and contrast guidance; its marketing layout recipes are outside this product's scope. Existing Radix behavior, Manrope files, Lucide family, routes, field order, and persistent data contracts are retained.
+
+Audit: previous warm-green surfaces competed with orange actions, the overview alone used an inverted theme, and nutrition administration appeared before the daily diary. Those visual decisions are superseded here. One semantic palette now covers light and system-preferred dark appearance. Orange denotes primary navigation/actions, green and red retain workout meanings, and macro colors stay explicitly labeled. Cards use 20px corners, grouped lists 16–18px, controls 10–12px, and the timer remains circular.
+
+Today uses one light/dark-consistent energy overview with the primary number emphasized. Nutrition combines meals into a single divided diary and places management links after it. Training separates the start/resume action from schedule and management; active training removes its enclosing card so the dial becomes the focus. Trends groups related measurements into a divided surface. Mobile controls and bottom navigation retain safe-area clearance. No sample data, imagery, or additional runtime dependencies were added.
