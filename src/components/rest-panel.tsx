@@ -1,6 +1,13 @@
 "use client";
 import { useState } from "react";
-import { Timer, Volume2, ChevronRight } from "lucide-react";
+import {
+  Timer,
+  Volume2,
+  ChevronRight,
+  Play,
+  Square,
+  Check,
+} from "lucide-react";
 import { type Session } from "@/lib/model";
 import { endRest, extendRest } from "@/lib/workout";
 import { useStore } from "@/lib/store";
@@ -13,7 +20,15 @@ export function RestPanel({
   session,
   exerciseId,
   update,
+  actionLabel,
+  actionDisabled,
+  actionComplete,
+  onComplete,
 }: {
+  actionLabel: string;
+  actionDisabled: boolean;
+  actionComplete: boolean;
+  onComplete: () => void;
   session: Session;
   exerciseId: string;
   update: (fn: (s: Session) => void) => Promise<boolean>;
@@ -57,22 +72,94 @@ export function RestPanel({
           修改
         </button>
       </div>
-      {session.restEndsAt && (
-        <div className={`rest-console ${remaining === 0 ? "finished" : ""}`}>
-          <p className="rest-owner">
-            {owner
-              ? `${owner.exercise.name} · ${session.restTimer?.kind === "exercise" ? "动作间休息" : `${ownerSet?.warmup ? "热身" : "正式"}第 ${number} 组后休息`}`
-              : "此前保存的休息计时（未记录所属动作）"}
-          </p>
-          <div
-            className="rest-timer"
-            role="timer"
-            aria-label={remaining ? "休息倒计时" : "休息结束"}
+      <div
+        className={`rest-console ${session.restEndsAt && !remaining ? "finished" : ""}`}
+        data-state={
+          remaining ? "running" : session.restEndsAt ? "finished" : "idle"
+        }
+      >
+        <p className="rest-owner">
+          {owner
+            ? `${owner.exercise.name} · ${session.restTimer?.kind === "exercise" ? "动作间休息" : `${ownerSet?.warmup ? "热身" : "正式"}第 ${number} 组后休息`}`
+            : session.restEndsAt
+              ? "此前保存的休息计时（未记录所属动作）"
+              : `${exercise.exercise.name} · 组间休息`}
+        </p>
+        <div className="timer-dial">
+          <svg viewBox="0 0 240 240" aria-hidden="true">
+            <circle className="dial-track" cx="120" cy="120" r="110" />
+            <circle
+              className="dial-progress"
+              cx="120"
+              cy="120"
+              r="110"
+              pathLength="100"
+              strokeDasharray="100"
+              strokeDashoffset={
+                session.restEndsAt
+                  ? 100 *
+                    (1 -
+                      Math.min(
+                        1,
+                        Math.max(0, session.restEndsAt - alerts.now) /
+                          Math.max(
+                            1,
+                            session.restTimer?.durationMs ||
+                              (owner?.target.rest ?? exercise.target.rest) *
+                                1000,
+                          ),
+                      ))
+                  : 0
+              }
+            />
+          </svg>
+          <button
+            className={`dial-button ${remaining ? "stop" : session.restEndsAt ? "expired" : "start"}`}
+            aria-label={remaining ? "结束休息" : actionLabel}
+            disabled={saving || (!remaining && actionDisabled)}
+            onClick={(event) => {
+              if (event.detail > 1) return;
+              if (remaining)
+                void update((s) => {
+                  if (s.restTimer?.id === token) endRest(s);
+                });
+              else onComplete();
+            }}
           >
-            <Timer size={22} />
-            <strong>{remaining ? clockText(remaining) : "休息结束"}</strong>
-            <span>{remaining ? "放松，准备下一组" : "按自己的节奏继续"}</span>
-          </div>
+            {remaining ? (
+              <Square size={20} fill="currentColor" aria-hidden="true" />
+            ) : actionComplete ? (
+              <Check size={22} aria-hidden="true" />
+            ) : (
+              <Play size={22} fill="currentColor" aria-hidden="true" />
+            )}
+            <strong
+              role="timer"
+              aria-label={
+                remaining
+                  ? "休息倒计时"
+                  : session.restEndsAt
+                    ? "休息结束"
+                    : "预设休息时间"
+              }
+            >
+              {clockText(session.restEndsAt ? remaining : exercise.target.rest)}
+            </strong>
+            <span>
+              {remaining ? "结束休息" : actionComplete ? "动作完成" : "开始"}
+            </span>
+          </button>
+        </div>
+        <p className="dial-caption">
+          {remaining
+            ? "休息中 · 点击中心提前结束"
+            : session.restEndsAt
+              ? "休息结束 · 完成下一组后再点击开始"
+              : actionComplete
+                ? "可以切换到下一个动作"
+                : actionLabel}
+        </p>
+        {session.restEndsAt && (
           <div className="rest-controls">
             <Button
               variant="secondary"
@@ -84,20 +171,9 @@ export function RestPanel({
             >
               ＋30 秒
             </Button>
-            <Button
-              variant="secondary"
-              disabled={saving}
-              onClick={() =>
-                update((s) => {
-                  if (s.restTimer?.id === token) endRest(s);
-                })
-              }
-            >
-              结束休息
-            </Button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
       <details className="rest-options">
         <summary>
           {session.soundEnabled

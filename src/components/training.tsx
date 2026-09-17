@@ -69,28 +69,6 @@ const categories = {
   cardio: "有氧",
   other: "其他",
 };
-const catalogue: Exercise[] = [
-  ["bench-press", "杠铃卧推", "push", "weighted"],
-  ["squat", "杠铃深蹲", "legs", "weighted"],
-  ["deadlift", "硬拉", "pull", "weighted"],
-  ["row", "坐姿划船", "pull", "weighted"],
-  ["lat-pulldown", "高位下拉", "pull", "weighted"],
-  ["shoulder-press", "哑铃肩推", "push", "weighted"],
-  ["curl", "哑铃弯举", "pull", "weighted"],
-  ["leg-press", "腿举", "legs", "weighted"],
-  ["push-up", "俯卧撑", "push", "bodyweight"],
-  ["pull-up", "引体向上", "pull", "bodyweight"],
-  ["assisted-pull-up", "辅助引体向上", "pull", "assisted"],
-  ["plank", "平板支撑", "core", "timed"],
-  ["run", "跑步", "cardio", "timed"],
-  ["bike", "骑行", "cardio", "timed"],
-].map(([id, name, category, mode]) => ({
-  id: `standard-${id}`,
-  name,
-  category: category as Exercise["category"],
-  mode: mode as Exercise["mode"],
-  archived: false,
-}));
 const makeTarget = (exercise: Exercise): TemplateExercise => ({
   id: uid(),
   exercise,
@@ -357,7 +335,7 @@ export function Training({ date }: { date: string }) {
             </div>
           )}
           <div className="inline-action">
-            <p>常见动作已可选择，也可以添加自己的动作。</p>
+            <p>动作由你自己填写，按自己的训练习惯命名。</p>
             <Button variant="secondary" onClick={() => setExercise(true)}>
               <Plus size={17} />
               自定义动作
@@ -546,12 +524,10 @@ function TemplateForm({
     template ? structuredClone(template.exercises) : [],
   );
   const [pick, setPick] = useState("");
+  const [mode, setMode] = useState<Exercise["mode"]>("weighted");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const exercises = [
-    ...catalogue,
-    ...state.exercises.filter((e) => !e.archived),
-  ];
+
   const update = (id: string, key: keyof TemplateExercise, value: unknown) =>
     setItems(items.map((x) => (x.id === id ? { ...x, [key]: value } : x)));
   async function save(e: FormEvent<HTMLFormElement>) {
@@ -596,23 +572,40 @@ function TemplateForm({
         </Field>
         <div className="inline-picker">
           <Field label="添加动作">
-            <select value={pick} onChange={(e) => setPick(e.target.value)}>
-              <option value="">选择动作</option>
-              {exercises.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.name} · {categories[e.category]}
-                </option>
-              ))}
-            </select>
+            <input
+              value={pick}
+              maxLength={160}
+              placeholder="填写动作名称"
+              onChange={(e) => setPick(e.target.value)}
+            />
           </Field>
           <Button
             type="button"
             variant="secondary"
-            disabled={!pick || items.length >= 40}
+            disabled={!pick.trim() || items.length >= 40}
             onClick={() => {
-              const e = exercises.find((e) => e.id === pick);
-              if (e) {
-                setItems([...items, makeTarget(e)]);
+              const name = pick.trim();
+              if (name) {
+                const existing =
+                  state.exercises.find(
+                    (e) => e.name === name && e.mode === mode,
+                  ) ??
+                  state.templates
+                    .flatMap((t) => t.exercises)
+                    .map((e) => e.exercise)
+                    .find((e) => e.name === name && e.mode === mode);
+                setItems([
+                  ...items,
+                  makeTarget(
+                    existing ?? {
+                      id: uid(),
+                      name,
+                      mode,
+                      category: "other",
+                      archived: false,
+                    },
+                  ),
+                ]);
                 setPick("");
               }
             }}
@@ -621,6 +614,18 @@ function TemplateForm({
             添加
           </Button>
         </div>
+        <Field label="新动作记录方式">
+          <select
+            value={mode}
+            onChange={(e) => setMode(e.target.value as Exercise["mode"])}
+          >
+            {Object.entries(modes).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </Field>
         {items.map((item, index) => (
           <fieldset key={item.id} className="exercise-builder">
             <legend>
@@ -931,6 +936,8 @@ function Workout({ session }: { session: Session }) {
   const [error, setError] = useState("");
   const [replace, setReplace] = useState<string | null>(null);
   const [replacement, setReplacement] = useState("");
+  const [replacementMode, setReplacementMode] =
+    useState<Exercise["mode"]>("weighted");
   const [busy, setBusy] = useState(false);
   const remaining = session.restEndsAt
     ? Math.max(0, Math.ceil((session.restEndsAt - now) / 1000))
@@ -976,10 +983,7 @@ function Workout({ session }: { session: Session }) {
       actionLock.current = false;
     }
   }
-  const exercises = [
-    ...catalogue,
-    ...state.exercises.filter((e) => !e.archived),
-  ];
+
   return (
     <section className="active-workout">
       <div className="workout-header">
@@ -994,7 +998,7 @@ function Workout({ session }: { session: Session }) {
         </div>
         <div className="elapsed">
           <Clock3 size={17} />
-          {Math.floor((now - session.startedAt) / 60000)}
+          {Math.max(0, Math.floor((now - session.startedAt) / 60000))}
           <small>分钟</small>
         </div>
       </div>
@@ -1041,6 +1045,32 @@ function Workout({ session }: { session: Session }) {
             : progress.done + 1 < progress.total);
         return (
           <div className="workout-exercise" key={item.id}>
+            <div className="set-progress">
+              <span>正式组已完成</span>
+              <strong>
+                {progress.done}
+                <small> / {progress.total}</small>
+              </strong>
+              <span>
+                热身 {item.sets.filter((row) => row.warmup && row.done).length}{" "}
+                / {item.sets.filter((row) => row.warmup).length}
+              </span>
+            </div>
+            <RestPanel
+              session={session}
+              exerciseId={item.id}
+              update={update}
+              actionLabel={
+                pending
+                  ? `完成${pending.warmup ? "热身第" : "第"}${pendingNumber}组${willRest ? "并休息" : ""}`
+                  : "动作已完成"
+              }
+              actionComplete={!pending}
+              actionDisabled={!pending || actionCooling}
+              onComplete={() => {
+                if (pending) void record(item.id, pending.id, true);
+              }}
+            />
             <div className="exercise-head">
               <div>
                 <span className="eyebrow">
@@ -1061,18 +1091,6 @@ function Workout({ session }: { session: Session }) {
                 </button>
               )}
             </div>
-            <div className="set-progress">
-              <span>正式组已完成</span>
-              <strong>
-                {progress.done}
-                <small> / {progress.total}</small>
-              </strong>
-              <span>
-                热身 {item.sets.filter((row) => row.warmup && row.done).length}{" "}
-                / {item.sets.filter((row) => row.warmup).length}
-              </span>
-            </div>
-            <RestPanel session={session} exerciseId={item.id} update={update} />
             {previous && (
               <p className="previous-record">
                 上次：
@@ -1159,25 +1177,9 @@ function Workout({ session }: { session: Session }) {
               ))}
             </div>
             <div className="complete-set-action">
-              {pending ? (
-                <Button
-                  className="full"
-                  disabled={saving || actionCooling || remaining > 0}
-                  onClick={(event) => {
-                    if (event.detail < 2)
-                      void record(item.id, pending.id, true);
-                  }}
-                >
-                  {remaining > 0
-                    ? "休息中，结束休息后继续"
-                    : `完成${pending.warmup ? "热身第" : "第"}${pendingNumber}组${willRest ? "并休息" : ""}`}
-                </Button>
-              ) : (
+              {!pending && (
                 <p className="exercise-complete">
-                  该动作已完成
-                  {exerciseIndex < session.exercises.length - 1
-                    ? "，可以前往下一个动作"
-                    : "，可以结束并保存训练"}
+                  该动作已完成，可以前往下一个动作或保存训练
                 </p>
               )}
               {!pending && exerciseIndex < session.exercises.length - 1 && (
@@ -1426,24 +1428,39 @@ function Workout({ session }: { session: Session }) {
           onClose={() => setReplace(null)}
         >
           <Field label="新动作">
-            <select
+            <input
               value={replacement}
+              maxLength={160}
+              placeholder="填写新动作名称"
               onChange={(e) => setReplacement(e.target.value)}
+            />
+          </Field>
+          <Field label="新动作记录方式">
+            <select
+              value={replacementMode}
+              onChange={(e) =>
+                setReplacementMode(e.target.value as Exercise["mode"])
+              }
             >
-              <option value="">选择动作</option>
-              {exercises.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.name}
+              {Object.entries(modes).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
                 </option>
               ))}
             </select>
           </Field>
           <Button
             className="full"
-            disabled={!replacement}
+            disabled={!replacement.trim()}
             onClick={async () => {
-              const exercise = exercises.find((e) => e.id === replacement);
-              if (!exercise) return;
+              if (!replacement.trim()) return;
+              const exercise: Exercise = {
+                id: uid(),
+                name: replacement.trim(),
+                mode: replacementMode,
+                category: "other",
+                archived: false,
+              };
               const target = makeTarget(exercise);
               const fresh = startSession(
                 {

@@ -23,7 +23,14 @@ export function beginRest(
     return;
   }
   session.restEndsAt = now + seconds * 1000;
-  session.restTimer = { id: uid(), exerciseId, setId, kind, notifiedAt: null };
+  session.restTimer = {
+    id: uid(),
+    exerciseId,
+    setId,
+    kind,
+    notifiedAt: null,
+    durationMs: seconds * 1000,
+  };
 }
 export function completeSet(
   session: Session,
@@ -81,7 +88,13 @@ export function extendRest(
   )
     return;
   session.restEndsAt = Math.max(now, session.restEndsAt) + 30000;
-  if (session.restTimer) session.restTimer.notifiedAt = null;
+  if (session.restTimer) {
+    session.restTimer.durationMs = Math.max(
+      session.restTimer.durationMs,
+      session.restEndsAt - now,
+    );
+    session.restTimer.notifiedAt = null;
+  }
 }
 export function claimRestAlert(
   session: Session,

@@ -158,7 +158,9 @@ function App() {
           </div>
         </div>
       </aside>
-      <main className="main">
+      <main
+        className={`main ${route === "training/session" ? "workout-mode" : ""}`}
+      >
         <header className="topbar">
           <div className="mobile-brand">
             <Dumbbell size={20} />

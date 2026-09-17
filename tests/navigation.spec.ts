@@ -74,8 +74,8 @@ test("workouts show one exercise and retain sets across navigation", async ({
   await page.goto("./#training/templates");
   await page.getByRole("button", { name: "新建模板", exact: true }).click();
   await page.getByLabel("模板名称").fill("Focused workout");
-  for (const exercise of ["standard-bench-press", "standard-squat"]) {
-    await page.getByLabel("添加动作").selectOption(exercise);
+  for (const exercise of ["杠铃卧推", "杠铃深蹲"]) {
+    await page.getByLabel("添加动作").fill(exercise);
     await page.getByRole("button", { name: "添加", exact: true }).click();
   }
   await page.getByRole("button", { name: "保存训练模板" }).click();

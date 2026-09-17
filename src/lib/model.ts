@@ -127,6 +127,7 @@ export const sessionSchema = z.object({
       setId: id.nullable(),
       kind: z.enum(["set", "exercise"]),
       notifiedAt: num(1, 1e15).nullable(),
+      durationMs: num(0, 1e15).default(0),
     })
     .nullable()
     .default(null),

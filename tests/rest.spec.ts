@@ -55,13 +55,11 @@ async function setup(page: Page, seconds = 90) {
   });
   await page.goto("./");
   await page.getByRole("button", { name: "设置与备份" }).click();
-  await page
-    .locator('input[type="file"]')
-    .setInputFiles({
-      name: "test.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(serializeBackup(state)),
-    });
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "test.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(serializeBackup(state)),
+  });
   await page.getByRole("button", { name: "确认", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.goto("./#training/templates");
@@ -75,6 +73,16 @@ test("owned rest controls, undo, warmups, final set and navigation remain consis
   page,
 }) => {
   await setup(page);
+  await page.setViewportSize({ width: 375, height: 812 });
+  await expect(page.locator(".rest-console")).toHaveAttribute(
+    "data-state",
+    "idle",
+  );
+  await expect(page.getByRole("timer")).toHaveText("1:30");
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const dial = await page.locator(".timer-dial").boundingBox();
+  expect(dial!.y + dial!.height).toBeLessThan(740);
+  await page.screenshot({ path: "test-results/workout-dial-idle.png" });
   await page
     .getByRole("button", { name: "完成第1组并休息", exact: true })
     .dblclick();
@@ -82,6 +90,13 @@ test("owned rest controls, undo, warmups, final set and navigation remain consis
   await expect(page.locator(".rest-owner")).toContainText(
     "高位下拉 · 正式第 1 组后休息",
   );
+  await expect
+    .poll(async () =>
+      Number(
+        await page.locator(".dial-progress").getAttribute("stroke-dashoffset"),
+      ),
+    )
+    .toBeGreaterThan(0);
   const first = await session(page);
   await page.getByRole("button", { name: "＋30 秒", exact: true }).click();
   await expect
@@ -100,7 +115,10 @@ test("owned rest controls, undo, warmups, final set and navigation remain consis
   await expect(page.locator(".set-progress")).toContainText("1 / 4");
   expect((await session(page)).restTimer.id).toBe(second.restTimer.id);
   await page.getByRole("button", { name: /撤销刚才一组/ }).click();
-  await expect(page.locator(".rest-console")).toHaveCount(0);
+  await expect(page.locator(".rest-console")).toHaveAttribute(
+    "data-state",
+    "idle",
+  );
   await expect(page.locator(".set-progress")).toContainText("0 / 4");
   await page.getByRole("button", { name: "＋ 热身组", exact: true }).click();
   await page
@@ -120,7 +138,10 @@ test("owned rest controls, undo, warmups, final set and navigation remain consis
     if (i < 4)
       await page.getByRole("button", { name: "结束休息", exact: true }).click();
   }
-  await expect(page.locator(".rest-console")).toHaveCount(0);
+  await expect(page.locator(".rest-console")).toHaveAttribute(
+    "data-state",
+    "idle",
+  );
   await expect(
     page.getByRole("button", { name: "前往下一个动作" }),
   ).toBeVisible();

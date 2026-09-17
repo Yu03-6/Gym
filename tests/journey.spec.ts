@@ -47,7 +47,7 @@ test("mobile journal: real inputs, history, interruption and backup recovery", a
   await page.getByRole("link", { name: /训练模板/ }).click();
   await page.getByRole("button", { name: "新建模板", exact: true }).click();
   await page.getByLabel("模板名称").fill("上肢训练");
-  await page.getByLabel("添加动作").selectOption("standard-bench-press");
+  await page.getByLabel("添加动作").fill("杠铃卧推");
   await page.getByRole("button", { name: "添加", exact: true }).click();
   await page.getByLabel("重量 · kg", { exact: true }).fill("60");
   await page.getByRole("button", { name: "保存训练模板" }).click();
@@ -75,7 +75,10 @@ test("mobile journal: real inputs, history, interruption and backup recovery", a
     page.getByRole("button", { name: "撤销杠铃卧推第2组" }),
   ).toBeVisible();
   await expect(page.getByLabel("杠铃卧推第2组次数")).toHaveValue("8");
-  await expect(page.locator(".rest-timer")).toContainText("放松");
+  await expect(page.locator(".rest-console")).toHaveAttribute(
+    "data-state",
+    "running",
+  );
   await page.getByRole("button", { name: "结束并保存训练" }).click();
   await page.getByRole("button", { name: "确认", exact: true }).click();
   await expect(page.locator(".active-workout")).toHaveCount(0);

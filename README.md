@@ -17,7 +17,9 @@ There is no recipe generator, weekly menu, or shopping list. Influencer-specific
 
 ## Workout sessions
 
-Start at zero completed formal sets. Completing a set records it once and starts the configured rest; expiry never records another set. Warmups have a separate count. The last formal set skips automatic rest, with optional exercise-to-exercise rest before moving on.
+Exercise names are entered directly when creating a template or replacing an exercise; no built-in catalogue is presented. Existing exercise snapshots remain intact.
+
+The circular rest dial is always visible in the workout view, including before the first set. Its central start button is green, the end control is red, and the outer stroke shrinks with the remaining time. Start at zero completed formal sets. Completing a set records it once and starts the configured rest; expiry never records another set. Warmups have a separate count. The last formal set skips automatic rest, with optional exercise-to-exercise rest before moving on.
 
 Add 30 seconds or end rest without changing records. Undo cancels only the timer owned by the undone set. The timer identifies its exercise, survives navigation and reload using an absolute deadline, and is accessible from other sections. Rest duration can be configured at session start or per exercise without changing the template.
 

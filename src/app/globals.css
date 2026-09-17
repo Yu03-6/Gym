@@ -1384,32 +1384,6 @@ details[open] {
   font-size: 12px;
   font-weight: 400;
 }
-.rest-timer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  background: var(--green-soft);
-  border-radius: 12px;
-  padding: 12px 16px;
-  color: #35523a;
-  min-height: 63px;
-}
-.rest-timer > span {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-}
-.rest-timer strong {
-  font-size: 20px;
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-}
-.rest-timer .text-button {
-  color: var(--green);
-  padding: 0;
-}
 .workout-exercise {
   padding: 24px 0;
   border-top: 1px solid var(--border);
@@ -2233,19 +2207,6 @@ details[open] {
   }
   .elapsed small {
     font-size: 11px;
-  }
-  .rest-timer {
-    padding: 9px 12px;
-    gap: 8px;
-  }
-  .rest-timer > span {
-    font-size: 12px;
-  }
-  .rest-timer strong {
-    font-size: 17px;
-  }
-  .rest-timer .text-button {
-    font-size: 12px;
   }
   .set-row,
   .set-head {
@@ -3336,50 +3297,125 @@ textarea:hover:not(:disabled) {
   font-size: 13px;
   color: #57664f;
 }
+/* Persistent workout dial; the outer stroke represents remaining time. */
 .rest-console {
-  padding: 16px;
-  margin: 8px 0 12px;
-  border-radius: 18px;
-  background: #eaf0df;
-  border: 1px solid #dce5ce;
+  margin: 8px 0 16px;
+  text-align: center;
+  color: var(--green);
 }
 .rest-owner {
   font-size: 12px;
-  color: #4c6042;
-  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 10px;
 }
-.rest-console .rest-timer {
-  padding: 12px 0;
-  margin: 0;
+.timer-dial {
+  position: relative;
+  width: min(240px, 100%);
+  aspect-ratio: 1;
+  margin: auto;
+  display: grid;
+  place-items: center;
+}
+.timer-dial > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+.timer-dial circle {
+  fill: none;
+  stroke-width: 5;
+}
+.dial-track {
+  stroke: var(--green-soft);
+}
+.dial-progress {
+  stroke: var(--green);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 250ms linear;
+}
+.finished .dial-progress {
+  stroke: var(--danger);
+}
+.dial-button {
   border: 0;
-  background: transparent;
+  border-radius: 50%;
+  width: 78%;
+  height: 78%;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   align-items: center;
-  color: #294431;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--green-soft);
+  color: var(--green);
+  transition:
+    background 150ms,
+    transform 150ms;
 }
-.rest-console .rest-timer strong {
-  font-size: 40px;
+.dial-button.stop,
+.dial-button.expired {
+  color: var(--danger);
+  background: #fbeceb;
+}
+.dial-button strong {
+  font-size: 44px;
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
   letter-spacing: -1px;
 }
-.rest-console .rest-timer span {
-  font-size: 12px;
-  margin-left: auto;
+.dial-button span {
+  font-size: 14px;
+  font-weight: 600;
 }
-.rest-console.finished {
-  background: #f0f3e9;
+.dial-button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.dial-button:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 4px;
+}
+.dial-caption {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 12px 0;
 }
 .rest-controls {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  display: flex;
+  justify-content: center;
 }
 .rest-controls .button {
-  min-height: 46px;
-  padding: 10px;
+  min-height: 44px;
+  min-width: 130px;
+  padding: 8px 18px;
   font-size: 14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dial-progress,
+  .dial-button {
+    transition: none;
+  }
+}
+.active-workout .workout-header {
+  margin-bottom: 10px;
+}
+.active-workout .workout-header .eyebrow {
+  display: none;
+}
+.active-workout .workout-header h2 {
+  font-size: 20px;
+}
+.active-workout .workout-exercise {
+  padding-top: 12px;
+  margin-top: 12px;
+}
+.active-workout .exercise-head .eyebrow {
+  display: none;
+}
+.active-workout .set-progress {
+  margin: 8px 0;
 }
 .rest-options {
   margin: 4px 0 16px;
@@ -3456,12 +3492,6 @@ textarea:hover:not(:disabled) {
   font-size: 12px;
 }
 @media (max-width: 600px) {
-  .rest-console .rest-timer strong {
-    font-size: 36px;
-  }
-  .rest-console .rest-timer > svg {
-    width: 18px;
-  }
   .set-progress {
     gap: 8px;
   }
@@ -3472,4 +3502,39 @@ textarea:hover:not(:disabled) {
     font-size: 13px;
     padding: 9px 12px;
   }
+}
+
+.workout-mode .page-heading {
+  margin: 10px 0;
+}
+.workout-mode .page-heading > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.workout-mode .page-heading h1 {
+  font-size: 18px;
+}
+.workout-mode .back-link {
+  margin: 0;
+}
+.workout-mode .active-workout {
+  padding: 16px;
+}
+.workout-mode .exercise-switcher {
+  margin: 10px 0 0;
+}
+.workout-mode .exercise-switcher > span {
+  margin-bottom: 4px;
+}
+.workout-mode .workout-exercise {
+  padding-top: 4px;
+  margin-top: 6px;
+}
+.workout-mode .set-progress {
+  padding: 4px 0;
+}
+.workout-mode .exercise-head {
+  margin: 16px 0 8px;
 }
